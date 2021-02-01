@@ -1,0 +1,247 @@
+! Module  : system_m
+! Purpose : operating system support
+!
+! Copyright 2021 Rich Townsend
+!
+! This file is part of the ForUM (Fortran Utility Modules)
+! package. ForUM is free software: you can redistribute it and/or
+! modify it under the terms of the GNU General Public License as
+! published by the Free Software Foundation, version 3.
+!
+! ForUM is distributed in the hope that it will be useful, but WITHOUT
+! ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+! or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+! License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#:include 'common.inc'
+
+module system_m
+
+   ! Uses
+
+   use kinds_m
+
+   use ISO_FORTRAN_ENV
+
+   ! No implicit typing
+
+   implicit none
+
+   ! Interfaces
+
+   interface get_arg
+      #:for suffix in ALL_SUFFIXES
+         module procedure get_arg_${suffix}$_
+      #:endfor
+   end interface get_arg
+
+   interface get_env 
+      #:for suffix in ALL_SUFFIXES
+         module procedure get_arg_${suffix}$_
+      #:endfor
+   end interface get_env
+
+   ! Access specifiers
+
+   private
+
+   public :: n_arg
+   public :: get_arg
+   public :: get_env
+
+contains
+
+   function n_arg ()
+
+      integer :: n_arg
+
+      ! Get the number of arguments
+
+      n_arg = COMMAND_ARGUMENT_COUNT()
+
+      ! Finish
+
+      return
+
+   end function n_arg
+
+   !****
+
+   #:for type, suffix in zip(MATH_TYPES, MATH_SUFFIXES)
+
+      subroutine get_arg_${suffix}$_(number, value, status)
+
+         integer, intent(in)            :: number
+         ${type}$, intent(out)          :: value
+         integer, optional, intent(out) :: status
+
+         integer                   :: length
+         integer                   :: status_
+         character(:), allocatable :: buffer
+
+         ! Read the numbered command argument
+
+         ! Determine the argument length
+
+         call GET_COMMAND_ARGUMENT(number, LENGTH=length, STATUS=status_)
+
+         if (PRESENT(status)) then
+            status = status_
+            if (status_ /= 0) return
+         else
+            @:ASSERT(status_ == 0,error when reading command argument)
+         endif
+
+         ! Read the argument into a character buffer
+
+         allocate(character(length)::buffer)
+
+         call GET_COMMAND_ARGUMENT(number, buffer)
+
+         ! Extract the value from the buffer
+
+         read(buffer, *) value
+
+         ! Finish
+
+         return
+
+      end subroutine get_arg_${suffix}$_
+
+   #:endfor
+
+   !****
+
+   #:for type, suffix in zip(CHAR_TYPES, CHAR_SUFFIXES)
+
+      #:set def_type = type.replace('*', ':')
+
+      subroutine get_arg_${suffix}$_(number, value, status)
+
+         integer, intent(in)                    :: number
+         ${def_type}$, allocatable, intent(out) :: value
+         integer, optional, intent(out)         :: status
+
+         integer :: length
+         integer :: status_
+
+         ! Read the numbered command argument
+
+         ! Determine the argument length
+
+         call GET_COMMAND_ARGUMENT(number, LENGTH=length, STATUS=status_)
+
+         if (PRESENT(status)) then
+            status = status_
+            if (status_ /= 0) return
+         else
+            @:ASSERT(status_ == 0,error when reading command argument)
+         endif
+
+         ! Read the argument
+
+         if (length > 0) then
+            allocate(character(length)::value)
+            call GET_COMMAND_ARGUMENT(number, value)
+         endif
+
+         ! Finish
+
+         return
+
+      end subroutine get_arg_${suffix}$_
+
+   #:endfor
+      
+   !****
+
+   #:for type, suffix in zip(MATH_TYPES,MATH_SUFFIXES)
+
+      subroutine get_env_${suffix}$_(name, value, status)
+
+         character(*), intent(in)       :: name
+         ${type}$, intent(out)          :: value
+         integer, optional, intent(out) :: status
+
+         integer                   :: length
+         integer                   :: status_
+         character(:), allocatable :: buffer
+
+         ! Read the named environment variable
+
+         ! Determine the variable length
+
+         call GET_ENVIRONMENT_VARIABLE(name, LENGTH=length, STATUS=status_)
+
+         if (PRESENT(status)) then
+            status = status_
+            if (status_ /= 0) return
+         else
+            @:ASSERT(status_ == 0,error when reading environment variable)
+         endif
+
+         ! Read the variable into a character buffer
+
+         allocate(character(length)::buffer)
+
+         call GET_ENVIRONMENT_VARIABLE(name, buffer)
+
+         ! Extract the value from the buffer
+
+         read(buffer, *) value
+
+         ! Finish
+
+         return
+
+      end subroutine get_env_${suffix}$_
+
+   #:endfor
+
+   !****
+
+   #:for type, suffix in zip(CHAR_TYPES, CHAR_SUFFIXES)
+
+      #:set def_type = type.replace('*', ':')
+
+      subroutine get_env_${suffix}$_(name, value, status)
+
+         character(*), intent(in)               :: name
+         ${def_type}$, allocatable, intent(out) :: value
+         integer, optional, intent(out)         :: status
+
+         integer :: length
+         integer :: status_
+
+         ! Read the named environment variable
+
+         ! Determine the variable length
+
+         call GET_ENVIRONMENT_VARIABLE(name, LENGTH=length, STATUS=status_)
+
+         if (PRESENT(status)) then
+            status = status_
+            if (status_ /= 0) return
+         else
+            @:ASSERT(status_ == 0,error when reading environment variable)
+         endif
+
+         ! Read the variable
+
+         if (length > 0) then
+            allocate(character(length)::value)
+            call GET_ENVIRONMENT_VARIABLE(name, value)
+         endif
+
+         ! Finish
+
+         return
+
+      end subroutine get_env_${suffix}$_
+
+   #:endfor
+      
+end module system_m

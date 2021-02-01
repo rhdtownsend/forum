@@ -1,0 +1,67 @@
+! Submodule : hdf5io_alloc_read_sm
+! Purpose   : allocatable read routines for hdf5io_t type
+!
+! Copyright 2021 Rich Townsend
+!
+! This file is part of the ForUM (Fortran Utility Modules)
+! package. ForUM is free software: you can redistribute it and/or
+! modify it under the terms of the GNU General Public License as
+! published by the Free Software Foundation, version 3.
+!
+! ForUM is distributed in the hope that it will be useful, but WITHOUT
+! ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+! or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+! License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#:include 'common.inc'
+#:include 'hdf5io.inc'
+
+submodule (hdf5io_m) hdf5io_alloc_read_sm
+
+contains
+
+   #:for obj_type in ('attr', 'dset')
+      #:for rank in range(RANK_MAX+1)
+         #:for type, suffix in zip(ALL_TYPES, ALL_SUFFIXES)
+         
+            subroutine alloc_read_${obj_type}$_${suffix}$_${rank}$_(self, item_name, data)
+
+               class(hdf5io_t), intent(inout)     :: self
+               character(*), intent(in)           :: item_name
+               ${type}$, allocatable, intent(out) :: data${SPEC_LIST(rank)}$
+
+               #:if rank > 0
+                  integer(HSIZE_T) :: item_shape(${rank}$)
+               #:endif
+
+               ! Allocate the item
+                  
+               #:if rank > 0
+
+                  call self%get_${obj_type}$_shape(item_name, item_shape)
+                  allocate(data${INDEX_LIST(rank, 'item_shape')}$)
+
+               #:else
+
+                  allocate(data)
+
+               #:endif
+
+               ! Read the item
+
+               call self%read_${obj_type}$(item_name, data)
+
+               ! Finish
+
+               return
+
+            end subroutine alloc_read_${obj_type}$_${suffix}$_${rank}$_
+
+         #:endfor
+      #:endfor
+   #:endfor
+
+end submodule hdf5io_alloc_read_sm
