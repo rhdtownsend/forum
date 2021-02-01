@@ -1,5 +1,5 @@
-#! Include : common
-#! Purpose : common macros
+#! Include : forum
+#! Purpose : common macros used throughout ForUM
 #!
 #! Copyright 2021 Rich Townsend
 #!
@@ -18,13 +18,13 @@
 
 #!!! Type and suffix definitions
 
-#:set INT_KINDS = ['i4', 'i8']
+#:set INT_KINDS = ['I4', 'I8']
 #:set INT_TYPES = [f'integer({kind})' for kind in INT_KINDS]
-#:set INT_SUFFIXES = INT_KINDS
+#:set INT_SUFFIXES = ['i4', 'i8']
 
-#:set REAL_KINDS = ['r4', 'r8']
+#:set REAL_KINDS = ['R4', 'R8']
 #:set REAL_TYPES = [f'real({kind})' for kind in REAL_KINDS]
-#:set REAL_SUFFIXES = REAL_KINDS
+#:set REAL_SUFFIXES = ['r4', 'r8']
 
 #:set COMPLEX_KINDS = REAL_KINDS
 #:set COMPLEX_TYPES = [f'complex({kind})' for kind in REAL_KINDS]

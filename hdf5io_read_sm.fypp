@@ -16,7 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#:include 'common.inc'
+#:include 'forum.inc'
 #:include 'hdf5io.inc'
 
 submodule (hdf5io_m) hdf5io_read_sm
