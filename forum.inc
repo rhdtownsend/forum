@@ -28,7 +28,7 @@
 
 #:set COMPLEX_KINDS = REAL_KINDS
 #:set COMPLEX_TYPES = [f'complex({kind})' for kind in REAL_KINDS]
-#:set COMPLEX_SUFFIXES = [kind.replace('r', 'c') for kind in REAL_KINDS]
+#:set COMPLEX_SUFFIXES = [kind.replace('R', 'C') for kind in REAL_KINDS]
 
 #:set CHAR_TYPES = ['character(*)']
 #:set CHAR_SUFFIXES = ['s']
@@ -70,18 +70,30 @@
 
 #:def ASSERT(cond, message=None)
    if (.NOT. (${cond}$)) then
-      $:ABORT(message)
-  end if
+      #:if message
+         $:ABORT(f'assertion "{cond}" failed with message "{message}"')
+      #:else
+         $:ABORT(f'assertion "{cond}" failed')
+      #:endif
+   end if
 #:enddef
 
 #!!
 #! Same as ASSERT, but only if DEBUG is set
 #!!
 
-#:def ASSERT_DEBUG(cond, message)
+#:def ASSERT_DEBUG(cond, message=None)
    #:if defined('DEBUG')
       $:ASSERT(cond, message)
    #:endif
+#:enddef
+
+#!!
+#! Used for bounds checking
+#!!
+
+#:def CHECK_BOUNDS(x, y)
+   $:ASSERT_DEBUG(x+'=='+y, 'bounds mismatch')
 #:enddef
 
 #!!
