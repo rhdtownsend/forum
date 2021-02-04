@@ -37,15 +37,13 @@ contains
                contiguous :: data
                #:endif
 
-               integer          :: hdf_err
-               logical          :: item_exists
-               integer(HSIZE_T) :: item_shape(${rank}$)
-               integer(HID_T)   :: dspace_id
-               integer(HID_T)   :: plist_id
-               integer(HID_T)   :: mem_type_id
-               integer(HID_T)   :: file_type_id
-               type(C_PTR)      :: data_ptr
-               integer(HID_T)   :: item_id
+               integer        :: hdf_err
+               integer(HID_T) :: dspace_id
+               integer(HID_T) :: plist_id
+               integer(HID_T) :: mem_type_id
+               integer(HID_T) :: file_type_id
+               type(C_PTR)    :: data_ptr
+               integer(HID_T) :: item_id
 
                ! Write the item
 
@@ -59,8 +57,10 @@ contains
                   @:HDF5_CALL(h5pcreate_f, H5P_ATTRIBUTE_CREATE_F, plist_id)
                #:else
                   @:HDF5_CALL(h5pcreate_f, H5P_DATASET_CREATE_F, plist_id)
-                  @:HDF5_CALL(h5pset_chunk_f, plist_id, ${rank}$, INT(SHAPE(data), HSIZE_T))
-                  @:HDF5_CALL(h5pset_deflate_f, plist_id, self%comp_level)
+                  #:if rank > 0
+                     @:HDF5_CALL(h5pset_chunk_f, plist_id, ${rank}$, INT(SHAPE(data), HSIZE_T))
+                     @:HDF5_CALL(h5pset_deflate_f, plist_id, self%comp_level)
+                  #:endif
                #:endif
 
                mem_type_id = mem_type_id_${suffix}$
