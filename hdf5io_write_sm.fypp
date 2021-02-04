@@ -164,4 +164,4 @@ contains
       #:endfor
    #:endfor
             
-end submodule hdf5io_alloc_read_sm
+end submodule hdf5io_write_sm
