@@ -261,7 +261,6 @@ contains
    subroutine open_library_()
 
       integer       :: hdf_err
-      logical, save :: types_set = .FALSE.
 
       ! Open the HDF5 library
       
