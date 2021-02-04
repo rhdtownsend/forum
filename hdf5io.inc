@@ -24,5 +24,8 @@
    #:set vars = vars_pos + ['hdf_err'] + ['{:s}={:s}'.format(key, value) for key, value in vars_kw.items()]
    #:set arg_list = '(' + ','.join(vars) + ')'
    call ${proc}$${arg_list}$
-   @:ASSERT(hdf_err == -1,Error in call to ${proc}$)
+   if (hdf_err == -1) then
+      call h5eprint_f(hdf_err)
+      @:ABORT(error in call to ${proc}$)
+   endif
 #:enddef
