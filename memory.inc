@@ -48,10 +48,11 @@
       i_a = LBOUND(array)
       i_b = i_a + shape - 1
 
-      allocate(array_new${SHAPE_LIST(rank, 'i_a', 'i_b')}$, STAT=stat)
-
       if (PRESENT(stat)) then
+         allocate(array_new${SHAPE_LIST(rank, 'i_a', 'i_b')}$, STAT=stat)
          if (stat /= 0) return
+      else
+         allocate(array_new${SHAPE_LIST(rank, 'i_a', 'i_b')}$)
       endif
 
       ! Copy the data from old to new
