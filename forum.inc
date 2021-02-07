@@ -70,10 +70,11 @@
 
 #:def ASSERT(cond, message=None)
    if (.NOT. (${cond}$)) then
+      #:set cond_str = cond.replace("'", "''")
       #:if message
-         $:ABORT(f'assertion "{cond}" failed with message "{message}"')
+         $:ABORT(f'assertion "{cond_str}" failed with message "{message}"')
       #:else
-         $:ABORT(f'assertion "{cond}" failed')
+         $:ABORT(f'assertion "{cond_str}" failed')
       #:endif
    end if
 #:enddef
