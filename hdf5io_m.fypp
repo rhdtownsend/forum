@@ -39,6 +39,8 @@ module hdf5io_m
    integer, parameter :: CREATE_FILE = 1
    integer, parameter :: OPEN_FILE = 2
 
+   integer, parameter :: TYPE_LEN = 31
+
    ! Derived-type definitions
 
    type hdf5io_t
@@ -93,6 +95,7 @@ module hdf5io_m
 
    public :: CREATE_FILE
    public :: OPEN_FILE
+   public :: TYPE_LEN
    public :: hdf5io_t
    
    ! Procedures
