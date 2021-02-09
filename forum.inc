@@ -18,17 +18,17 @@
 
 #!!! Type and suffix definitions
 
-#:set INT_KINDS = ['I4', 'I8']
+#:set INT_KINDS = ['IS', 'ID']
 #:set INT_TYPES = [f'integer({kind})' for kind in INT_KINDS]
-#:set INT_SUFFIXES = ['i4', 'i8']
+#:set INT_SUFFIXES = ['is', 'id']
 
-#:set REAL_KINDS = ['R4', 'R8']
+#:set REAL_KINDS = ['RS', 'RD']
 #:set REAL_TYPES = [f'real({kind})' for kind in REAL_KINDS]
-#:set REAL_SUFFIXES = ['r4', 'r8']
+#:set REAL_SUFFIXES = ['rs', 'rd']
 
 #:set COMPLEX_KINDS = REAL_KINDS
 #:set COMPLEX_TYPES = [f'complex({kind})' for kind in REAL_KINDS]
-#:set COMPLEX_SUFFIXES = [kind.replace('R', 'C') for kind in REAL_KINDS]
+#:set COMPLEX_SUFFIXES = [kind.replace('r', 'c') for kind in REAL_SUFFIXES]
 
 #:set CHAR_TYPES = ['character(*)']
 #:set CHAR_SUFFIXES = ['s']
@@ -101,65 +101,8 @@
 #! Create a deferred shape array specification list
 #!!
 
-#:def SPEC_LIST(rank)
+#:def ARRAY_SPEC(rank, str=':')
    #:if rank > 0
-      $:'(' + ','.join(':'*rank) + ')'
-   #:endif
-#:enddef
-
-#!!
-#! Create an index list, with indices v
-#!!
-
-#:def INDEX_LIST(rank, v)
-   #:if rank > 0
-      #:set a = []
-      #:for i in range(1, rank+1)
-         #:set a = a + [f'{v}({i})']
-      #:endfor
-      $:'(' + ','.join(a) + ')'
-   #:endif
-#:enddef
-
-#!!
-#! Create a shape list, with lower bound l and upper bound u
-#!!
-
-#:def SHAPE_LIST(rank, l, u)
-   #:if rank > 0
-      #:set a = []   
-      #:for i in range(1, rank+1)
-         #:set b = []
-         #:for v in (l, u)
-            #:set b = b + [f'{v}({i})']
-         #:endfor
-         #:set a = a + [':'.join(b)]
-      #:endfor
-      $:'(' + ','.join(a) + ')'
-   #:endif
-#:enddef
-
-#!!
-#! Create a slice list, with lower bound l, upper bound u and stride s
-#!!
-
-#:def SLICE_LIST(rank, l=None, u=None, s=None)
-   #:if rank > 0
-      #:set a = []   
-      #:for i in range(1, rank+1)
-         #:set b = []
-         #:for v in (l, u)
-            #:if v
-               #:set b = b + [f'{v}({i})']
-            #:else
-               #:set b = b + ['']
-            #:endif
-         #:endfor
-	 #:if s
-	   #:set b = b + [f'{s}({i})']
-	 #:endif
-         #:set a = a + [':'.join(b)]
-      #:endfor
-      $:'(' + ','.join(a) + ')'
+      $:'(' + ','.join([str.format(i) for i in range(1, rank+1)]) + ')'
    #:endif
 #:enddef

@@ -237,23 +237,23 @@ contains
 
       ! Set up data types
 
-      mem_type_id_i4 = h5kind_to_type(i4, H5_INTEGER_KIND)
-      mem_type_id_i8 = h5kind_to_type(i4, H5_INTEGER_KIND)
+      mem_type_id_is = h5kind_to_type(is, H5_INTEGER_KIND)
+      mem_type_id_id = h5kind_to_type(id, H5_INTEGER_KIND)
 
-      mem_type_id_r4 = h5kind_to_type(r4, H5_REAL_KIND)
-      mem_type_id_r8 = h5kind_to_type(r8, H5_REAL_KIND)
+      mem_type_id_rs = h5kind_to_type(rs, H5_REAL_KIND)
+      mem_type_id_rd = h5kind_to_type(rd, H5_REAL_KIND)
 
-      call create_complex_type_(mem_type_id_r4, mem_type_id_c4)
-      call create_complex_type_(mem_type_id_r8, mem_type_id_c8)
+      call create_complex_type_(mem_type_id_rs, mem_type_id_cs)
+      call create_complex_type_(mem_type_id_rd, mem_type_id_cd)
 
-      file_type_id_i4 = H5T_STD_I32LE
-      file_type_id_i8 = H5T_STD_I64LE
+      file_type_id_is = H5T_STD_I32LE
+      file_type_id_id = H5T_STD_I64LE
 
-      file_type_id_r4 = H5T_IEEE_F32LE
-      file_type_id_r8 = H5T_IEEE_F64LE
+      file_type_id_rs = H5T_IEEE_F32LE
+      file_type_id_rd = H5T_IEEE_F64LE
 
-      call create_complex_type_(file_type_id_r4, file_type_id_c4)
-      call create_complex_type_(file_type_id_r8, file_type_id_c8)
+      call create_complex_type_(file_type_id_rs, file_type_id_cs)
+      call create_complex_type_(file_type_id_rd, file_type_id_cd)
 
       ! Finish
 
@@ -443,7 +443,7 @@ contains
 
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
-               ${type}$, target, intent(out)  :: data${SPEC_LIST(rank)}$
+               ${type}$, target, intent(out)  :: data${ARRAY_SPEC(rank)}$
                #:if rank > 0
                   contiguous :: data
                #:endif
@@ -489,7 +489,7 @@ contains
 
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
-               ${type}$, target, intent(out)  :: data${SPEC_LIST(rank)}$
+               ${type}$, target, intent(out)  :: data${ARRAY_SPEC(rank)}$
                #:if rank > 0
                   contiguous :: data
                #:endif
@@ -538,7 +538,7 @@ contains
 
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
-               ${type}$, target, intent(out)  :: data${SPEC_LIST(rank)}$
+               ${type}$, target, intent(out)  :: data${ARRAY_SPEC(rank)}$
                #:if rank > 0
                   contiguous :: data
                #:endif
@@ -546,7 +546,7 @@ contains
                #:if rank > 0
                   integer(HSIZE_T) :: item_shape(${rank}$)
                #:endif
-               integer, allocatable :: data_i${SPEC_LIST(rank)}$
+               integer, allocatable :: data_i${ARRAY_SPEC(rank)}$
 
                ! Read the logical item
 
@@ -554,7 +554,7 @@ contains
 
                   item_shape = SHAPE(data)
 
-                  allocate(data_i${INDEX_LIST(rank, 'item_shape')}$)
+                  allocate(data_i${ARRAY_SPEC(rank, 'item_shape({0:d})')}$)
 
                #:else
 
@@ -587,7 +587,7 @@ contains
 
                class(hdf5io_t), intent(inout)     :: self
                character(*), intent(in)           :: item_name
-               ${type}$, allocatable, intent(out) :: data${SPEC_LIST(rank)}$
+               ${type}$, allocatable, intent(out) :: data${ARRAY_SPEC(rank)}$
 
                #:if rank > 0
                   integer(HSIZE_T) :: item_shape(${rank}$)
@@ -598,7 +598,7 @@ contains
                #:if rank > 0
 
                   call self%get_${obj_type}$_shape(item_name, item_shape)
-                  allocate(data${INDEX_LIST(rank, 'item_shape')}$)
+                  allocate(data${ARRAY_SPEC(rank, 'item_shape({0:d})')}$)
 
                #:else
 
@@ -631,7 +631,7 @@ contains
             
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
-               ${type}$, target, intent(in)   :: data${SPEC_LIST(rank)}$
+               ${type}$, target, intent(in)   :: data${ARRAY_SPEC(rank)}$
                #:if rank > 0
                contiguous :: data
                #:endif
@@ -692,7 +692,7 @@ contains
 
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
-               ${type}$, target, intent(in)   :: data${SPEC_LIST(rank)}$
+               ${type}$, target, intent(in)   :: data${ARRAY_SPEC(rank)}$
                #:if rank > 0
                   contiguous :: data
                #:endif
@@ -743,7 +743,7 @@ contains
 
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
-               ${type}$, target, intent(in)   :: data${SPEC_LIST(rank)}$
+               ${type}$, target, intent(in)   :: data${ARRAY_SPEC(rank)}$
                #:if rank > 0
                   contiguous :: data
                #:endif
