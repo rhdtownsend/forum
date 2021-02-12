@@ -414,7 +414,7 @@ contains
 
          @:HDF5_CALL(${prefix}$open_f, self%group_id, item_name, item_id)
 
-         @:HDF5_CALL(h5aget_space_f, item_id, space_id)
+         @:HDF5_CALL(${prefix}$get_space_f, item_id, space_id)
 
          @:HDF5_CALL(h5sget_simple_extent_ndims_f, space_id, rank)
          @:ASSERT(rank == SIZE(shape),rank mismatch)
