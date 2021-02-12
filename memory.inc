@@ -52,7 +52,7 @@
          allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$, STAT=stat)
          if (stat /= 0) return
       else
-         allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_c({0:d})')}$)
+         allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$)
       endif
 
       ! Copy the data from old to new
