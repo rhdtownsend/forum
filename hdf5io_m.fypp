@@ -708,7 +708,7 @@ contains
 
                   item_shape = self%${obj_type}$_shape(item_name)
                   @:ASSERT(SIZE(item_shape) == ${rank}$, rank mismatch)
-                  
+
                   allocate(data${ARRAY_SPEC(rank, 'item_shape({0:d})')}$)
 
                #:else
