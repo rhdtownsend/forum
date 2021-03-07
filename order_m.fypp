@@ -20,370 +20,370 @@
 
 module order_m
 
-  ! Uses
+   ! Uses
 
-  use kinds_m
+   use kinds_m
 
-  use ISO_FORTRAN_ENV
-  
-  ! No implicit typing
+   use ISO_FORTRAN_ENV
 
-  implicit none
+   ! No implicit typing
 
-  ! Interfaces
+   implicit none
 
-  interface sort_indices
-     #:for suffix in ORDERED_SUFFIXES
-        module procedure sort_indices_${suffix}$_
-     #:endfor
-  end interface sort_indices
+   ! Interfaces
 
-  interface unique_indices
-     #:for suffix in ORDERED_SUFFIXES
-        module procedure unique_indices_${suffix}$_
-     #:endfor
-  end interface unique_indices
+   interface sort_indices
+      #:for suffix in ORDERED_SUFFIXES
+         module procedure sort_indices_${suffix}$_
+      #:endfor
+   end interface sort_indices
 
-  interface locate
-     #:for suffix in ORDERED_SUFFIXES
-        module procedure locate_${suffix}$_
-     #:endfor
-     #:for suffix in REAL_SUFFIXES
-        module procedure locate_uniform_${suffix}$_
-     #:endfor
-  end interface locate
+   interface unique_indices
+      #:for suffix in ORDERED_SUFFIXES
+         module procedure unique_indices_${suffix}$_
+      #:endfor
+   end interface unique_indices
 
-  ! Access specifiers
+   interface locate
+      #:for suffix in ORDERED_SUFFIXES
+         module procedure locate_${suffix}$_
+      #:endfor
+      #:for suffix in REAL_SUFFIXES
+         module procedure locate_uniform_${suffix}$_
+      #:endfor
+   end interface locate
 
-  private
+   ! Access specifiers
 
-  public :: sort_indices
-  public :: unique_indices
-  public :: locate
+   private
 
-  ! Procedures
+   public :: sort_indices
+   public :: unique_indices
+   public :: locate
+
+   ! Procedures
 
 contains
 
-  #:for type, suffix in zip(ORDERED_TYPES, ORDERED_SUFFIXES)
+   #:for type, suffix in zip(ORDERED_TYPES, ORDERED_SUFFIXES)
 
-     function sort_indices_${suffix}$_(x, descend) result (indices)
+      function sort_indices_${suffix}$_(x, descend) result (indices)
 
-       ${type}$, intent(in)          :: x(:)
-       logical, optional, intent(in) :: descend
-       integer                       :: indices(SIZE(x))
+         ${type}$, intent(in)          :: x(:)
+         logical, optional, intent(in) :: descend
+         integer                       :: indices(SIZE(x))
 
-       integer :: N
-       integer :: L(0:SIZE(x)+1)
-       integer :: i
-       integer :: p
-       integer :: q
-       integer :: s
-       integer :: t
+         integer :: N
+         integer :: L(0:SIZE(x)+1)
+         integer :: i
+         integer :: p
+         integer :: q
+         integer :: s
+         integer :: t
 
-       ! Calculate the indices to sort x in ascending order (or
-       ! descending, if descend is .TRUE.).
-       !
-       ! This routine uses the List Merge Sort algorithm described by
-       ! Knuth (1998, The Art of Computer Programming Vol. 3, Addison-
-       ! Wesley, Massachusetts, 3rd edn.). Labels and variable names
-       ! deliberately follow those of Knuth (apart from K() -> x())
+         ! Calculate the indices to sort x in ascending order (or
+         ! descending, if descend is .TRUE.).
+         !
+         ! This routine uses the List Merge Sort algorithm described by
+         ! Knuth (1998, The Art of Computer Programming Vol. 3, Addison-
+         ! Wesley, Massachusetts, 3rd edn.). Labels and variable names
+         ! deliberately follow those of Knuth (apart from K() -> x())
 
-       N = SIZE(x)
+         N = SIZE(x)
 
-       ! Special casing if N is 0 or 1; Knuth assumes N >= 2
+         ! Special casing if N is 0 or 1; Knuth assumes N >= 2
 
-       if(N == 0) then
-          return
-       elseif(N == 1) then
-          indices(1) = 1
-          return
-       end if
+         if (N == 0) then
+            return
+         elseif (N == 1) then
+            indices(1) = 1
+            return
+         end if
 
-       ! L1 : Prepare two lists
+         ! L1 : Prepare two lists
 
-       L(0) = 1
-       L(1:N-2) = [(-(i+2), i=1,N-2)]
-       L(N-1:N) = 0
-       L(N+1) = 2
+         L(0) = 1
+         L(1:N-2) = [(-(i+2), i=1,N-2)]
+         L(N-1:N) = 0
+         L(N+1) = 2
 
-       ! L2 : Begin new pass
+         ! L2 : Begin new pass
 
-       L2_loop : do
+         L2_loop : do
 
-          s = 0
-          t = N + 1
+            s = 0
+            t = N + 1
 
-          p = L(s)
-          q = L(t)
+            p = L(s)
+            q = L(t)
 
-          if(q == 0) exit L2_loop
+            if (q == 0) exit L2_loop
 
-          ! L3 : Compare K_p:K_q
+            ! L3 : Compare K_p:K_q
 
-          L3_loop : do
+            L3_loop : do
 
-             if(x(p) > x(q)) then
+               if (x(p) > x(q)) then
 
-                ! L6 : Advance q
+                  ! L6 : Advance q
 
-                L(s) = SIGN(q, L(s))
-                s = q
-                q = L(q)
+                  L(s) = SIGN(q, L(s))
+                  s = q
+                  q = L(q)
 
-                if(q > 0) cycle L3_loop
+                  if (q > 0) cycle L3_loop
 
-                ! L7 : Complete the sublist
+                  ! L7 : Complete the sublist
 
-                L(s) = p
-                s = t
+                  L(s) = p
+                  s = t
 
-                L7_loop : do
+                  L7_loop : do
 
-                   t = p
-                   p = L(p)
+                     t = p
+                     p = L(p)
 
-                   if(p <= 0) exit L7_loop
+                     if (p <= 0) exit L7_loop
 
-                end do L7_loop
+                  end do L7_loop
 
-             else
+               else
 
-                ! L4 : Advance q
+                  ! L4 : Advance q
 
-                L(s) = SIGN(p, L(s))
-                s = p
-                p = L(p)
+                  L(s) = SIGN(p, L(s))
+                  s = p
+                  p = L(p)
 
-                if(p > 0) cycle L3_loop
+                  if (p > 0) cycle L3_loop
 
-                ! L5 : Complete the sublist
+                  ! L5 : Complete the sublist
 
-                L(s) = q
-                s = t
+                  L(s) = q
+                  s = t
 
-                L5_loop : do
+                  L5_loop : do
 
-                  t = q
-                   q = L(q)
+                     t = q
+                     q = L(q)
 
-                   if(q <= 0) exit L5_loop
+                     if (q <= 0) exit L5_loop
 
-                end do L5_loop
+                  end do L5_loop
 
-             end if
+               end if
 
-             ! L8 : End of pass?
-             
-             p = -p
-             q = -q
+               ! L8 : End of pass?
 
-             if(q == 0) then
-                L(s) = SIGN(p, L(s))
-                L(t) = 0
-                exit L3_loop
-             endif
+               p = -p
+               q = -q
 
-          end do L3_loop
+               if (q == 0) then
+                  L(s) = SIGN(p, L(s))
+                  L(t) = 0
+                  exit L3_loop
+               endif
 
-       end do L2_loop
+            end do L3_loop
 
-       ! Use the link list to set up the indices array
-       
-       indices(1) = L(0)
+         end do L2_loop
 
-       do i = 2,N
-          indices(i) = L(indices(i-1))
-       enddo
+         ! Use the link list to set up the indices array
 
-       ! If necessary, reverse the indices
+         indices(1) = L(0)
 
-       if(PRESENT(descend)) then
-          if(descend) indices = indices(N:1:-1)
-       endif
+         do i = 2,N
+            indices(i) = L(indices(i-1))
+         enddo
 
-       ! Finish
+         ! If necessary, reverse the indices
 
-       return
+         if (PRESENT(descend)) then
+            if (descend) indices = indices(N:1:-1)
+         endif
 
-     end function sort_indices_${suffix}$_
+         ! Finish
 
-  #:endfor
+         return
 
-  !****
+      end function sort_indices_${suffix}$_
 
-  #:for type, suffix in zip(ORDERED_TYPES, ORDERED_SUFFIXES)
+   #:endfor
 
-     function unique_indices_${suffix}$_(x, descend) result (indices)
+   !****
 
-       ${type}$, intent(in)          :: x(:)
-       logical, optional, intent(in) :: descend
-       integer, allocatable          :: indices(:)
+   #:for type, suffix in zip(ORDERED_TYPES, ORDERED_SUFFIXES)
 
-       integer :: indices_(SIZE(x))
-       integer :: n
-       integer :: i
+      function unique_indices_${suffix}$_(x, descend) result (indices)
 
-       ! Calculate indices to sort x in increasing order and then
-       ! select unique values
+         ${type}$, intent(in)          :: x(:)
+         logical, optional, intent(in) :: descend
+         integer, allocatable          :: indices(:)
 
-       indices_ = sort_indices(x)
+         integer :: indices_(SIZE(x))
+         integer :: n
+         integer :: i
 
-       n = 1
+         ! Calculate indices to sort x in increasing order and then
+         ! select unique values
 
-       do i = 2,SIZE(x)
-          if(x(indices_(i)) /= x(indices_(n))) then
-             n = n + 1
-             indices_(n) = indices_(i)
-          endif
-       end do
+         indices_ = sort_indices(x)
 
-       indices = indices_(:n)
+         n = 1
 
-       ! If necessary, reverse the indices
+         do i = 2,SIZE(x)
+            if (x(indices_(i)) /= x(indices_(n))) then
+               n = n + 1
+               indices_(n) = indices_(i)
+            endif
+         end do
 
-       if(PRESENT(descend)) then
-          if(descend) indices = indices(n:1:-1)
-       endif
+         indices = indices_(:n)
 
-       ! Finish
+         ! If necessary, reverse the indices
 
-       return
+         if (PRESENT(descend)) then
+            if (descend) indices = indices(n:1:-1)
+         endif
 
-     end function unique_indices_${suffix}$_
+         ! Finish
 
-  #:endfor
+         return
 
-  !****
+      end function unique_indices_${suffix}$_
 
-  #:for type, suffix in zip(ORDERED_TYPES, ORDERED_SUFFIXES)
+   #:endfor
 
-     subroutine locate_${suffix}$_(x, x_loc, i_loc)
+   !****
 
-       ${type}$, intent(in) :: x(:)
-       ${type}$, intent(in) :: x_loc
-       integer, intent(out) :: i_loc
+   #:for type, suffix in zip(ORDERED_TYPES, ORDERED_SUFFIXES)
 
-       integer       :: n
-       integer, save :: i_lo
-       integer, save :: i_hi
-       integer       :: di
-       integer       :: i_mid
+      subroutine locate_${suffix}$_(x, x_loc, i_loc)
 
-       !$OMP THREADPRIVATE (i_lo, i_hi)
+         ${type}$, intent(in) :: x(:)
+         ${type}$, intent(in) :: x_loc
+         integer, intent(out) :: i_loc
 
-       ! Use a binary search to find where x_loc falls in x (assumed to
-       ! be in ascending order); x(i_loc) <= x_loc <= x(i_loc+1)
+         integer       :: n
+         integer, save :: i_lo
+         integer, save :: i_hi
+         integer       :: di
+         integer       :: i_mid
 
-       n = SIZE(x)
+         !$OMP THREADPRIVATE (i_lo, i_hi)
 
-       if(x_loc == x(n)) then
+         ! Use a binary search to find where x_loc falls in x (assumed to
+         ! be in ascending order); x(i_loc) <= x_loc <= x(i_loc+1)
 
-          i_loc = n - 1
+         n = SIZE(x)
 
-       elseif(x_loc == x(1)) then
+         if (x_loc == x(n)) then
 
-          i_loc = 1
+            i_loc = n - 1
 
-       else
+         elseif (x_loc == x(1)) then
 
-          if(i_lo < 1 .OR. i_lo >= n) then
+            i_loc = 1
 
-             i_lo = 0
-             i_hi = n+1
+         else
 
-          else
+            if (i_lo < 1 .OR. i_lo >= n) then
 
-             di = 1
+               i_lo = 0
+               i_hi = n+1
 
-             if(x_loc >= x(i_lo)) then
+            else
 
-                search_up_loop : do
+               di = 1
 
-                   i_hi = i_lo + di
+               if (x_loc >= x(i_lo)) then
 
-                   if(i_hi > n) then
-                      i_hi = n + 1
-                      exit search_up_loop
-                   endif
+                  search_up_loop : do
 
-                   if(x_loc < x(i_hi)) exit search_up_loop
+                     i_hi = i_lo + di
 
-                   i_lo = i_hi
-                   di = 2*di
+                     if (i_hi > n) then
+                        i_hi = n + 1
+                        exit search_up_loop
+                     endif
 
-                end do search_up_loop
+                     if (x_loc < x(i_hi)) exit search_up_loop
 
-             else
+                     i_lo = i_hi
+                     di = 2*di
 
-                search_down_loop : do
+                  end do search_up_loop
 
-                   i_hi = i_lo
-                   i_lo = i_hi - di
+               else
 
-                   if(i_lo < 1) then
-                      i_lo = 0
-                      exit search_down_loop
-                   endif
+                  search_down_loop : do
 
-                   if(x_loc >= x(i_lo)) exit search_down_loop
+                     i_hi = i_lo
+                     i_lo = i_hi - di
 
-                end do search_down_loop
+                     if (i_lo < 1) then
+                        i_lo = 0
+                        exit search_down_loop
+                     endif
 
-             endif
+                     if (x_loc >= x(i_lo)) exit search_down_loop
 
-          endif
+                  end do search_down_loop
 
-          refine_loop : do
+               endif
 
-             if(i_hi-i_lo <= 1) exit refine_loop
+            endif
 
-             i_mid = (i_hi + i_lo)/2
-          
-             if(x_loc >= x(i_mid)) then
-                i_lo = i_mid
-             else
-                i_hi = i_mid
-             endif
+            refine_loop : do
 
-          end do refine_loop
+               if (i_hi-i_lo <= 1) exit refine_loop
 
-          i_loc = i_lo
+               i_mid = (i_hi + i_lo)/2
 
-       endif
+               if (x_loc >= x(i_mid)) then
+                  i_lo = i_mid
+               else
+                  i_hi = i_mid
+               endif
 
-       ! Finish
+            end do refine_loop
 
-       return
+            i_loc = i_lo
 
-     end subroutine locate_${suffix}$_
+         endif
 
-  #:endfor
+         ! Finish
 
-  !****
+         return
 
-  #:for type, suffix in zip(REAL_TYPES, REAL_SUFFIXES)
+      end subroutine locate_${suffix}$_
 
-     subroutine locate_uniform_${suffix}$_(x_0, dx, x_loc, i_loc)
-       
-       ${type}$, intent(in) :: x_0
-       ${type}$, intent(in) :: dx
-       ${type}$, intent(in) :: x_loc
-       integer, intent(out) :: i_loc
+   #:endfor
 
-       ! Determine i_loc so that x_0 + (i_loc-1)*dx <= x_loc < x_0 + i_loc*dx
+   !****
 
-       i_loc = FLOOR((x_loc - x_0)/dx) + 1
+   #:for type, suffix in zip(REAL_TYPES, REAL_SUFFIXES)
 
-       if(x_0 + (i_loc-1)*dx > x_loc) i_loc = i_loc - 1
-       if(x_0 + i_loc*dx <= x_loc) i_loc = i_loc + 1
+      subroutine locate_uniform_${suffix}$_(x_0, dx, x_loc, i_loc)
 
-       ! Finish
+         ${type}$, intent(in) :: x_0
+         ${type}$, intent(in) :: dx
+         ${type}$, intent(in) :: x_loc
+         integer, intent(out) :: i_loc
 
-       return
+         ! Determine i_loc so that x_0 + (i_loc-1)*dx <= x_loc < x_0 + i_loc*dx
 
-     end subroutine locate_uniform_${suffix}$_
+         i_loc = FLOOR((x_loc - x_0)/dx) + 1
 
-  #:endfor
+         if (x_0 + (i_loc-1)*dx > x_loc) i_loc = i_loc - 1
+         if (x_0 + i_loc*dx <= x_loc) i_loc = i_loc + 1
+
+         ! Finish
+
+         return
+
+      end subroutine locate_uniform_${suffix}$_
+
+   #:endfor
 
 end module order_m
