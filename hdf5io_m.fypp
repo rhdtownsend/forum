@@ -458,12 +458,12 @@ contains
             type(C_PTR), value    :: c_data
             integer(C_INT)        :: ret_value
 
-            type(H5O_INFO_T) :: info
-            integer          :: hdf_err
+            type(H5O_INFO_T), target :: info
+            integer                  :: hdf_err
 
             ! Check that the link points to the appropriate object type
 
-            @:HDF5_CALL(h5oget_info_f, loc_id, info)
+            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, c_f_string(c_name), info)
 
             if (info%type == ${hdf_type}$) then
 
@@ -491,12 +491,12 @@ contains
             type(C_PTR), value    :: c_data
             integer(C_INT)        :: ret_value
 
-            type(H5O_INFO_T) :: info
-            integer          :: hdf_err
+            type(H5O_INFO_T), target :: info
+            integer                  :: hdf_err
 
             ! Check that the link points to the appropriate object type
 
-            @:HDF5_CALL(h5oget_info_f, loc_id, info)
+            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, c_f_string(c_name), info)
 
             if (info%type == ${hdf_type}$) then
 
