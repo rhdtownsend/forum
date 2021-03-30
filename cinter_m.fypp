@@ -43,12 +43,18 @@ module cinter_m
      module procedure c_f_string_ptr_
   end interface c_f_string
 
+  interface f_c_string
+     module procedure f_c_string_arr_
+     module procedure f_c_string_ptr_
+  end interface f_c_string
+
   ! Access specifiers
 
   private
 
   public :: c_f_len
   public :: c_f_string
+  public :: f_c_string
 
   ! Procedures
 
@@ -94,7 +100,7 @@ contains
 
       if (C_ASSOCIATED(c_str)) then
 
-         call c_f_pointer(c_str, p, [HUGE(0)])
+         call C_F_POINTER(c_str, p, [HUGE(0)])
 
          i = 1
 
@@ -119,10 +125,10 @@ contains
 
    !****
    
-   function c_f_string_arr_(c_str) result (f_str)
+   subroutine c_f_string_arr_(c_str, f_str)
 
-      character(C_CHAR)         :: c_str(*)
-      character(:), allocatable :: f_str
+      character(C_CHAR), intent(in)          :: c_str(*)
+      character(:), allocatable, intent(out) :: f_str
 
       integer :: n
       integer :: i
@@ -142,14 +148,14 @@ contains
 
       return
 
-   end function c_f_string_arr_
+   end subroutine c_f_string_arr_
 
    !****
 
-   function c_f_string_ptr_(c_str) result (f_str)
+   subroutine c_f_string_ptr_(c_str, f_str)
 
-      type(C_PTR), value        :: c_str
-      character(:), allocatable :: f_str
+      type(C_PTR), intent(in)                :: c_str
+      character(:), allocatable, intent(out) :: f_str
 
       character(C_CHAR), pointer :: p(:)
       integer                    :: n
@@ -180,6 +186,61 @@ contains
 
       return
 
-   end function c_f_string_ptr_
+   end subroutine c_f_string_ptr_
+
+   !****
+   
+   subroutine f_c_string_arr_(f_str, c_str)
+
+      character(*), intent(in)       :: f_str
+      character(C_CHAR), intent(out) :: c_str(*)
+
+      integer :: i
+
+      ! Convert the Fortran string into a C string (expressed as an
+      ! assumed-size array of C_CHARs, terminated by a NULL). The
+      ! storage for the C string is assumed to be already allocated,
+      ! with length at least LEN_TRIM(f_str)+1
+
+      copy_loop : do i = 1, LEN_TRIM(f_str)
+         c_str(i) = f_str(i:i)
+      end do copy_loop
+
+      c_str(i) = C_NULL_CHAR
+
+      ! Finish
+
+      return
+
+   end subroutine f_c_string_arr_
+
+   !****
+
+   subroutine f_c_string_ptr_(f_str, c_str)
+
+      character(*), intent(in) :: f_str
+      type(C_PTR), intent(in)  :: c_str
+
+      character(C_CHAR), pointer :: p(:)
+      integer                    :: i
+
+      ! Convert the Fortran string into a C string (expressed as a
+      ! pointer to a NULL-terminated sequence). The storage for the C
+      ! string is assumed to be already allocated, with length at
+      ! least LEN_TRIM(f_str)+1
+
+      call C_F_POINTER(c_str, p, [HUGE(0)])
+
+      copy_loop : do i = 1, LEN_TRIM(f_str)
+         p(i) = f_str(i:i)
+      end do copy_loop
+
+      p(i) = C_NULL_CHAR
+
+      ! Finish
+
+      return
+
+   end subroutine f_c_string_ptr_
 
 end module cinter_m
