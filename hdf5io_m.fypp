@@ -50,6 +50,7 @@ module hdf5io_m
       integer(HID_T)   :: file_id = 0
       integer(HID_T)   :: group_id = 0
       integer          :: comp_level = 0
+      integer          :: access_type = 0
       integer, pointer :: ref_count => null()
    contains
       private
@@ -148,12 +149,15 @@ contains
 
       hi%file_id = file_id
       hi%group_id = group_id
+
       if (PRESENT(comp_level)) then
          hi%comp_level = comp_level
       else
          hi%comp_level = 0
       endif
-
+      
+      hi%access_type = access_type
+      
       allocate(hi%ref_count)
       hi%ref_count = 1
 
@@ -179,6 +183,7 @@ contains
       if (hi_parent%group_exists(group_name)) then
          @:HDF5_CALL(h5gopen_f, hi_parent%group_id, group_name, group_id)
       else
+         @:ASSERT(hi_parent%access_type /= OPEN_FILE_RO, attempt to write to read-only file)
          @:HDF5_CALL(h5gcreate_f, hi_parent%group_id, group_name, group_id)
       endif
 
@@ -187,6 +192,7 @@ contains
       hi%file_id = hi_parent%file_id
       hi%group_id = group_id
       hi%comp_level = hi_parent%comp_level
+      hi%access_type = hi_parent%access_type
 
       hi%ref_count => hi_parent%ref_count
       hi%ref_count = hi%ref_count + 1
@@ -458,12 +464,15 @@ contains
             type(C_PTR), value    :: c_data
             integer(C_INT)        :: ret_value
 
-            type(H5O_INFO_T), target :: info
-            integer                  :: hdf_err
+            character(:), allocatable :: name
+            type(H5O_INFO_T), target  :: info
+            integer                   :: hdf_err
 
             ! Check that the link points to the appropriate object type
 
-            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, c_f_string(c_name), info)
+            call c_f_string(c_name, name)
+
+            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, name, info)
 
             if (info%type == ${hdf_type}$) then
 
@@ -491,12 +500,15 @@ contains
             type(C_PTR), value    :: c_data
             integer(C_INT)        :: ret_value
 
-            type(H5O_INFO_T), target :: info
-            integer                  :: hdf_err
+            character(:), allocatable :: name
+            type(H5O_INFO_T), target  :: info
+            integer                   :: hdf_err
 
             ! Check that the link points to the appropriate object type
 
-            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, c_f_string(c_name), info)
+            call c_f_string(c_name, name)
+
+            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, name, info)
 
             if (info%type == ${hdf_type}$) then
 
@@ -504,7 +516,7 @@ contains
 
                i_name = i_name + 1
 
-               names(i_name) = c_f_string(c_name)
+               names(i_name) = name
 
             end if
 
@@ -759,6 +771,8 @@ contains
                type(C_PTR)    :: data_ptr
                integer(HID_T) :: item_id
 
+               @:ASSERT(self%access_type /= OPEN_FILE_RO, attempt to write to read-only file)
+
                ! Write the item
 
                #:if rank > 0
@@ -818,6 +832,8 @@ contains
                integer(HID_T) :: dspace_id
                type(C_PTR)    :: data_ptr
                integer(HID_T) :: item_id
+
+               @:ASSERT(self%access_type /= OPEN_FILE_RO, attempt to write to read-only file)
 
                ! Write the character item
 
