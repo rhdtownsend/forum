@@ -25,7 +25,9 @@
    #:set arg_list = '(' + ','.join(vars) + ')'
    call ${proc}$${arg_list}$
    if (hdf_err == -1) then
-      call h5eprint_f(hdf_err)
-      @:ABORT(error in call to ${proc}$)
+      #:if defined('DEBUG')
+         call h5eprint_f(hdf_err)
+      #:endif
+      @:ABORT('error in call to ${proc}$')
    endif
 #:enddef
