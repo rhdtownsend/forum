@@ -92,7 +92,7 @@ contains
             status = status_
             if (status_ /= 0) return
          else
-            @:ASSERT(status_ == 0,error when reading command argument)
+            @:ASSERT(status_ == 0, 'error when reading command argument')
          endif
 
          ! Read the argument into a character buffer
@@ -138,7 +138,7 @@ contains
             status = status_
             if (status_ /= 0) return
          else
-            @:ASSERT(status_ == 0,error when reading command argument)
+            @:ASSERT(status_ == 0, 'error when reading command argument')
          endif
 
          ! Read the argument
@@ -180,7 +180,7 @@ contains
             status = status_
             if (status_ /= 0) return
          else
-            @:ASSERT(status_ == 0,error when reading environment variable)
+            @:ASSERT(status_ == 0, 'error when reading environment variable '//name)
          endif
 
          ! Read the variable into a character buffer
@@ -226,7 +226,7 @@ contains
             status = status_
             if (status_ /= 0) return
          else
-            @:ASSERT(status_ == 0,error when reading environment variable)
+            @:ASSERT(status_ == 0, 'error when reading environment variable '//name)
          endif
 
          ! Read the variable
