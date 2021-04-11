@@ -59,7 +59,7 @@
 #:def ABORT(message=None)
    write(UNIT=ERROR_UNIT, FMT=*) 'ABORT at line ${_LINE_}$ of ${_FILE_}$'
    #:if message
-      write(UNIT=ERROR_UNIT, FMT=*) '${message}$'
+      write(UNIT=ERROR_UNIT, FMT=*) ${message}$
    #:endif
    error stop
 #:enddef
@@ -72,9 +72,9 @@
    if (.NOT. (${cond}$)) then
       #:set cond_str = cond.replace("'", "''")
       #:if message
-         $:ABORT(f'assertion "{cond_str}" failed with message "{message}"')
+         @:ABORT('assertion ${cond_str}$ failed with message '//${message}$//'"')
       #:else
-         $:ABORT(f'assertion "{cond_str}" failed')
+         @:ABORT('assertion ${cond_str}$ failed')
       #:endif
    end if
 #:enddef
@@ -85,7 +85,7 @@
 
 #:def ASSERT_DEBUG(cond, message=None)
    #:if defined('DEBUG')
-      $:ASSERT(cond, message)
+      @:ASSERT(cond, message)
    #:endif
 #:enddef
 
@@ -94,7 +94,7 @@
 #!!
 
 #:def CHECK_BOUNDS(x, y)
-   $:ASSERT_DEBUG(x+'=='+y, 'bounds mismatch')
+   @:ASSERT_DEBUG(x == y, 'bounds mismatch')
 #:enddef
 
 #!!
