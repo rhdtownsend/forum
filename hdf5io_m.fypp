@@ -104,6 +104,7 @@ module hdf5io_m
    public :: OPEN_FILE_RW
    public :: TYPE_LEN
    public :: hdf5io_t
+   public :: is_hdf5
    
    ! Procedures
 
@@ -138,7 +139,7 @@ contains
       case(OPEN_FILE_RW)
          @:HDF5_CALL(h5fopen_f, file_name, H5F_ACC_RDWR_F, file_id)
       case default
-         @:ABORT(invalid access_type)
+         @:ABORT('invalid access_type')
       end select
 
       ! Open the root group
@@ -183,7 +184,7 @@ contains
       if (hi_parent%group_exists(group_name)) then
          @:HDF5_CALL(h5gopen_f, hi_parent%group_id, group_name, group_id)
       else
-         @:ASSERT(hi_parent%access_type /= OPEN_FILE_RO, attempt to write to read-only file)
+         @:ASSERT(hi_parent%access_type /= OPEN_FILE_RO, 'attempt to write to read-only file')
          @:HDF5_CALL(h5gcreate_f, hi_parent%group_id, group_name, group_id)
       endif
 
@@ -247,7 +248,7 @@ contains
       
       @:HDF5_CALL(h5open_f)
 
-      @:ASSERT(hdf_err == 0,Failed to open HDF5 library)
+      @:ASSERT(hdf_err == 0, 'failed to open HDF5 library')
 
       ! Set up data types
 
@@ -321,6 +322,45 @@ contains
       return
 
    end subroutine close_library_
+
+   !****
+
+   function is_hdf5(file_name)
+
+      character(*), intent(in) :: file_name
+      logical                  :: is_hdf5
+
+      integer :: hdf_err
+
+      ! If necessary, open the HDF5 library
+
+      if (ref_count == 0) then
+         call open_library_()
+      endif
+
+      ref_count = ref_count + 1
+
+      ! Test if the file exists, and is an HDF5 file
+
+      inquire(FILE=file_name, EXIST=is_hdf5)
+
+      if (is_hdf5) then
+         @:HDF5_CALL(h5fis_hdf5_f, file_name, is_hdf5)
+      endif
+
+      ! If necessary, close the HDF5 library
+
+      ref_count = ref_count - 1
+
+      if (ref_count == 0) then
+         call close_library_()
+      endif
+
+      ! Finish
+
+      return
+
+   end function is_hdf5
 
    !****
 
@@ -599,8 +639,8 @@ contains
                   ! Check rank and shape
 
                   item_shape = self%${obj_type}$_shape(item_name)
-                  @:ASSERT(SIZE(item_shape) == ${rank}$, rank mismatch)
-                  @:ASSERT(ALL(item_shape == SHAPE(data)), shape mismatch)
+                  @:ASSERT(SIZE(item_shape) == ${rank}$, 'rank mismatch')
+                  @:ASSERT(ALL(item_shape == SHAPE(data)), 'shape mismatch')
 
                #:endif
 
@@ -646,8 +686,8 @@ contains
                   ! Check rank and shape
 
                   item_shape = self%${obj_type}$_shape(item_name)
-                  @:ASSERT(SIZE(item_shape) == ${rank}$, rank mismatch)
-                  @:ASSERT(ALL(item_shape == SHAPE(data)), shape mismatch)
+                  @:ASSERT(SIZE(item_shape) == ${rank}$, 'rank mismatch')
+                  @:ASSERT(ALL(item_shape == SHAPE(data)), 'shape mismatch')
 
                #:endif
          
@@ -723,7 +763,7 @@ contains
                #:if rank > 0
 
                   item_shape = self%${obj_type}$_shape(item_name)
-                  @:ASSERT(SIZE(item_shape) == ${rank}$, rank mismatch)
+                  @:ASSERT(SIZE(item_shape) == ${rank}$, 'rank mismatch')
 
                   allocate(data${ARRAY_SPEC(rank, 'item_shape({0:d})')}$)
 
@@ -771,7 +811,7 @@ contains
                type(C_PTR)    :: data_ptr
                integer(HID_T) :: item_id
 
-               @:ASSERT(self%access_type /= OPEN_FILE_RO, attempt to write to read-only file)
+               @:ASSERT(self%access_type /= OPEN_FILE_RO, 'attempt to write to read-only file')
 
                ! Write the item
 
@@ -833,7 +873,7 @@ contains
                type(C_PTR)    :: data_ptr
                integer(HID_T) :: item_id
 
-               @:ASSERT(self%access_type /= OPEN_FILE_RO, attempt to write to read-only file)
+               @:ASSERT(self%access_type /= OPEN_FILE_RO, 'attempt to write to read-only file')
 
                ! Write the character item
 
