@@ -181,10 +181,12 @@ contains
 
       ! Depending on whether the group already exists, open or create it
 
-      if (hi_parent%group_exists(group_name)) then
+       if (hi_parent%group_exists(group_name)) then
          @:HDF5_CALL(h5gopen_f, hi_parent%group_id, group_name, group_id)
       else
-         @:ASSERT(hi_parent%access_type /= OPEN_FILE_RO, 'attempt to write to read-only file')
+         if (hi_parent%access_type == OPEN_FILE_RO) then
+            @:ABORT('attempt to open non-existant group')
+         endif
          @:HDF5_CALL(h5gcreate_f, hi_parent%group_id, group_name, group_id)
       endif
 
