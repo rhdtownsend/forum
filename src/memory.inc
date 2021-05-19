@@ -41,7 +41,7 @@
       integer, allocatable      :: i_b(:)
       integer, allocatable      :: i_c(:)
 
-      @:ASSERT_DEBUG(SIZE(shape) == ${rank}$,Rank mismatch)
+      @:ASSERT_DEBUG(SIZE(shape) == ${rank}$, 'rank mismatch')
 
       ! Allocate the new array
 
