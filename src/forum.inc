@@ -85,7 +85,7 @@
 
 #:def ASSERT_DEBUG(cond, message=None)
    #:if defined('DEBUG')
-      @:ASSERT(cond, message)
+      @:ASSERT(${cond}$, ${message}$)
    #:endif
 #:enddef
 
@@ -94,7 +94,7 @@
 #!!
 
 #:def CHECK_BOUNDS(x, y)
-   @:ASSERT_DEBUG(x == y, 'bounds mismatch')
+   @:ASSERT_DEBUG(${x}$ == ${y}$, 'bounds mismatch')
 #:enddef
 
 #!!
