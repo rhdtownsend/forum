@@ -265,15 +265,16 @@ contains
          integer, intent(out) :: i_loc
 
          integer       :: n
-         integer, save :: i_lo
-         integer, save :: i_hi
+         integer, save :: i_lo = 1
+         integer, save :: i_hi = 1
          integer       :: di
          integer       :: i_mid
 
          !$OMP THREADPRIVATE (i_lo, i_hi)
 
          ! Use a binary search to find where x_loc falls in x (assumed to
-         ! be in ascending order); x(i_loc) <= x_loc <= x(i_loc+1)
+         ! be in ascending order); x(i_loc) <= x_loc <= x(i_loc+1), with
+         ! the right equality applying only when i_loc == n
 
          n = SIZE(x)
 
@@ -287,10 +288,10 @@ contains
 
          else
 
-            if (i_lo < 1 .OR. i_lo >= n) then
+            if (i_lo <= 0 .OR. i_lo >= n) then
 
                i_lo = 0
-               i_hi = n+1
+               i_hi = n
 
             else
 
