@@ -260,17 +260,15 @@ contains
 
       subroutine locate_${suffix}$_(x, x_loc, i_loc)
 
-         ${type}$, intent(in) :: x(:)
-         ${type}$, intent(in) :: x_loc
-         integer, intent(out) :: i_loc
+         ${type}$, intent(in)   :: x(:)
+         ${type}$, intent(in)   :: x_loc
+         integer, intent(inout) :: i_loc
 
-         integer       :: n
-         integer, save :: i_lo = 1
-         integer, save :: i_hi = 1
-         integer       :: di
-         integer       :: i_mid
-
-         !$OMP THREADPRIVATE (i_lo, i_hi)
+         integer :: n
+         integer :: i_lo = 1
+         integer :: i_hi = 1
+         integer :: di
+         integer :: i_mid
 
          ! Use a binary search to find where x_loc falls in x (assumed to
          ! be in ascending order); x(i_loc) <= x_loc <= x(i_loc+1), with
@@ -287,6 +285,8 @@ contains
             i_loc = 1
 
          else
+
+            i_lo = i_loc
 
             if (i_lo <= 0 .OR. i_lo >= n) then
 
