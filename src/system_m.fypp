@@ -35,6 +35,7 @@ module system_m
    interface get_arg
       #:for suffix in ALL_SUFFIXES
          module procedure get_arg_${suffix}$_
+         module procedure get_arg_name_${suffix}$_
       #:endfor
    end interface get_arg
 
@@ -79,27 +80,25 @@ contains
          integer, optional, intent(out) :: status
 
          integer                   :: length
-         integer                   :: status_
          character(:), allocatable :: buffer
 
          ! Read the numbered command argument
 
          ! Determine the argument length
 
-         call GET_COMMAND_ARGUMENT(number, LENGTH=length, STATUS=status_)
-
+         call GET_COMMAND_ARGUMENT(number, LENGTH=length, STATUS=status)
          if (PRESENT(status)) then
-            status = status_
-            if (status_ /= 0) return
-         else
-            @:ASSERT(status_ == 0, 'error when reading command argument')
+            if (status /= 0) return
          endif
 
          ! Read the argument into a character buffer
 
          allocate(character(length)::buffer)
 
-         call GET_COMMAND_ARGUMENT(number, buffer)
+         call GET_COMMAND_ARGUMENT(number, buffer, STATUS=status)
+         if (PRESENT(status)) then
+            if (status /= 0) return
+         endif
 
          ! Extract the value from the buffer
 
@@ -110,6 +109,94 @@ contains
          return
 
       end subroutine get_arg_${suffix}$_
+
+      !****
+      
+      subroutine get_arg_name_${suffix}$_(name, value, status, first, last)
+
+         character(*), intent(in)       :: name
+         ${type}$, intent(out)          :: value
+         integer, intent(out), optional :: status
+         integer, intent(in), optional  :: first
+         integer, intent(in), optional  :: last
+
+         integer                   :: first_
+         integer                   :: last_
+         integer                   :: number
+         integer                   :: length
+         character(:), allocatable :: buffer
+         integer                   :: i
+
+         if (PRESENT(first)) then
+            first_ = MAX(first, 1)
+         else
+            first_ = 1
+         endif
+
+         if (PRESENT(last)) then
+            last_ = MIN(last, n_arg())
+         else
+            last_ = n_arg()
+         endif
+
+         ! Read the named command argument
+
+         if (first_ >= last_) then
+
+            ! Loop over arguments
+
+            arg_loop : do number = first_, last_
+
+               ! Determine the argument length
+
+               call GET_COMMAND_ARGUMENT(number, LENGTH=length, STATUS=status)
+               if (PRESENT(status)) then
+                  if (status /= 0) return
+               endif
+
+               ! Read the argument into a character buffer
+
+               allocate(character(length)::buffer)
+
+               call GET_COMMAND_ARGUMENT(number, buffer, STATUS=status)
+               if (PRESENT(status)) then
+                  if (status /= 0) return
+               endif
+
+               ! Check if the name matches
+
+               i = INDEX(buffer, '=')
+
+               if (i > 1) then
+
+                  if (buffer(:i-1) == name) then
+
+                     ! If a match is found, read the value and return
+
+                     read(buffer(i+1:), *) value
+                     if (PRESENT(status)) status = 0
+
+                     return
+
+                  end if
+                  
+               endif
+
+               deallocate(buffer)
+
+            end do arg_loop
+
+         end if
+
+         ! If we reach this point, set status to -2 to indicate not found
+
+         if (PRESENT(status)) status = -2
+
+         ! Finish
+
+         return
+
+      end subroutine get_arg_name_${suffix}$_
 
    #:endfor
 
@@ -153,6 +240,94 @@ contains
          return
 
       end subroutine get_arg_${suffix}$_
+
+      !****
+
+      subroutine get_arg_name_${suffix}$_(name, value, status, first, last)
+
+         character(*), intent(in)               :: name
+         ${def_type}$, allocatable, intent(out) :: value
+         integer, intent(out), optional         :: status
+         integer, intent(in), optional          :: first
+         integer, intent(in), optional          :: last
+
+         integer                   :: first_
+         integer                   :: last_
+         integer                   :: number
+         integer                   :: length
+         character(:), allocatable :: buffer
+         integer                   :: i
+
+         if (PRESENT(first)) then
+            first_ = MAX(first, 1)
+         else
+            first_ = 1
+         endif
+
+         if (PRESENT(last)) then
+            last_ = MIN(last, n_arg())
+         else
+            last_ = n_arg()
+         endif
+
+         ! Read the named command argument
+
+         if (first_ >= last_) then
+
+            ! Loop over arguments
+
+            arg_loop : do number = first_, last_
+
+               ! Determine the argument length
+
+               call GET_COMMAND_ARGUMENT(number, LENGTH=length, STATUS=status)
+               if (PRESENT(status)) then
+                  if (status /= 0) return
+               endif
+
+               ! Read the argument into a character buffer
+
+               allocate(character(length)::buffer)
+
+               call GET_COMMAND_ARGUMENT(number, buffer, STATUS=status)
+               if (PRESENT(status)) then
+                  if (status /= 0) return
+               endif
+
+               ! Check if the name matches
+
+               i = INDEX(buffer, '=')
+
+               if (i > 1) then
+
+                  if (buffer(:i-1) == name) then
+
+                     ! If a match is found, read the value and return
+
+                     value = buffer(i+1:)
+                     if (PRESENT(status)) status = 0
+
+                     return
+
+                  end if
+                  
+               endif
+
+               deallocate(buffer)
+
+            end do arg_loop
+
+         end if
+
+         ! If we reach this point, set status to -2 to indicate not found
+
+         if (PRESENT(status)) status = -2
+
+         ! Finish
+
+         return
+
+      end subroutine get_arg_name_${suffix}$_
 
    #:endfor
       
