@@ -1,7 +1,7 @@
 ! Module  : hdf5io
 ! Purpose : definition of hdf5io_t type, supporting HDF5 input/output
 !
-! Copyright 2021 Rich Townsend
+! Copyright 2021-2022 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or
@@ -55,8 +55,6 @@ module hdf5io_m
    contains
       private
       procedure, public :: final => final_
-      procedure         :: assign_
-      generic, public   :: assignment(=) => assign_
       #:for obj_type in ('group', 'attr', 'dset')
          procedure, public :: ${obj_type}$_exists
       #:endfor
@@ -241,32 +239,6 @@ contains
       return
 
    end subroutine final_
-
-   !****
-
-   subroutine assign_(self, hi)
-
-      class(hdf5io_t), intent(inout) :: self
-      type(hdf5io_t), intent(in)     :: hi
-
-      integer        :: hdf_err
-
-      ! Assign the hdf5io_t
-
-      @:HDF5_CALL(h5gopen_f, hi%group_id, '.', self%group_id)
-
-      self%file_id = hi%file_id
-      self%comp_level = hi%comp_level
-      self%access_type = hi%access_type
-
-      self%ref_count => hi%ref_count
-      self%ref_count = self%ref_count + 1
-
-      ! Finish
-
-      return
-
-   end subroutine assign_
 
    !****
 
