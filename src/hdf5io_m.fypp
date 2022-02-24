@@ -47,14 +47,17 @@ module hdf5io_m
 
    type hdf5io_t
       private
-      integer(HID_T)   :: file_id = 0
-      integer(HID_T)   :: group_id = 0
-      integer          :: comp_level = 0
-      integer          :: access_type = 0
-      integer, pointer :: ref_count => null()
+      character(:), allocatable :: file_name
+      character(:), allocatable :: group_name
+      integer(HID_T)            :: file_id = 0
+      integer(HID_T)            :: group_id = 0
+      integer                   :: comp_level = 0
+      integer                   :: access_type = 0
+      integer, pointer          :: ref_count => null()
    contains
       private
       procedure, public :: final => final_
+      procedure, public :: inquire
       #:for obj_type in ('group', 'attr', 'dset')
          procedure, public :: ${obj_type}$_exists
       #:endfor
@@ -148,6 +151,9 @@ contains
 
       ! Construct the hdf5io_t
 
+      hi%file_name = file_name
+      hi%group_name = obj_name_(group_id)
+
       hi%file_id = file_id
       hi%group_id = group_id
 
@@ -176,8 +182,10 @@ contains
       character(*), intent(in)      :: group_name
       type(hdf5io_t)                :: hi
 
-      integer        :: hdf_err
-      integer(HID_T) :: group_id
+      integer         :: hdf_err
+      integer(SIZE_T) :: buf_size
+      integer(SIZE_T) :: name_size
+      integer(HID_T)  :: group_id
 
       ! Depending on whether the group already exists, open or create it
 
@@ -191,6 +199,9 @@ contains
       endif
 
       ! Construct the hdf5io_t
+
+      hi%file_name = hi_parent%file_name
+      hi%group_name = obj_name_(group_id)
 
       hi%file_id = hi_parent%file_id
       hi%group_id = group_id
@@ -242,127 +253,22 @@ contains
 
    !****
 
-   subroutine open_library_()
+   subroutine inquire(self, file_name, group_name)
 
-      integer       :: hdf_err
+      class(hdf5io_t), intent(in)                      :: self
+      character(:), allocatable, intent(out), optional :: file_name
+      character(:), allocatable, intent(out), optional :: group_name
 
-      ! Open the HDF5 library
-      
-      @:HDF5_CALL(h5open_f)
+      ! Inquire metadata
 
-      @:ASSERT(hdf_err == 0, 'failed to open HDF5 library')
-
-      ! Set up data types
-
-      mem_type_id_is = h5kind_to_type(is, H5_INTEGER_KIND)
-      mem_type_id_id = h5kind_to_type(id, H5_INTEGER_KIND)
-
-      mem_type_id_rs = h5kind_to_type(rs, H5_REAL_KIND)
-      mem_type_id_rd = h5kind_to_type(rd, H5_REAL_KIND)
-
-      call create_complex_type_(mem_type_id_rs, mem_type_id_cs)
-      call create_complex_type_(mem_type_id_rd, mem_type_id_cd)
-
-      file_type_id_is = H5T_STD_I32LE
-      file_type_id_id = H5T_STD_I64LE
-
-      file_type_id_rs = H5T_IEEE_F32LE
-      file_type_id_rd = H5T_IEEE_F64LE
-
-      call create_complex_type_(file_type_id_rs, file_type_id_cs)
-      call create_complex_type_(file_type_id_rd, file_type_id_cd)
+      if (PRESENT(file_name)) file_name = self%file_name
+      if (PRESENT(group_name)) group_name = self%group_name
 
       ! Finish
 
       return
 
-   contains
-
-      subroutine create_complex_type_(comp_type_id, type_id)
-
-         integer(HID_T), intent(in)  :: comp_type_id
-         integer(HID_T), intent(out) :: type_id
-
-         integer         :: hdf_err
-         integer(SIZE_T) :: comp_size
-
-         ! Create a complex data type
-
-         @:HDF5_CALL(h5tget_size_f, comp_type_id, comp_size)
-
-         @:HDF5_CALL(h5tcreate_f, H5T_COMPOUND_F, INT(2*comp_size, SIZE_T), type_id)
-         @:HDF5_CALL(h5tinsert_f, type_id, 're', INT(0, SIZE_T), comp_type_id)
-         @:HDF5_CALL(h5tinsert_f, type_id, 'im', INT(comp_size, SIZE_T), comp_type_id)
-
-         ! Finish
-
-         return
-
-      end subroutine create_complex_type_
-
-   end subroutine open_library_
-
-   !****
-
-   subroutine close_library_()
-
-      integer :: hdf_err
-
-      ! Close complex data types
-
-      #:for suffix in COMPLEX_SUFFIXES
-         @:HDF5_CALL(h5tclose_f, mem_type_id_${suffix}$)
-         @:HDF5_CALL(h5tclose_f, file_type_id_${suffix}$)
-      #:endfor
-
-      ! Close the HDF5 library
-
-      @:HDF5_CALL(h5close_f)
-
-      ! Finish
-
-      return
-
-   end subroutine close_library_
-
-   !****
-
-   function is_hdf5(file_name)
-
-      character(*), intent(in) :: file_name
-      logical                  :: is_hdf5
-
-      integer :: hdf_err
-
-      ! If necessary, open the HDF5 library
-
-      if (ref_count == 0) then
-         call open_library_()
-      endif
-
-      ref_count = ref_count + 1
-
-      ! Test if the file exists, and is an HDF5 file
-
-      inquire(FILE=file_name, EXIST=is_hdf5)
-
-      if (is_hdf5) then
-         @:HDF5_CALL(h5fis_hdf5_f, file_name, is_hdf5)
-      endif
-
-      ! If necessary, close the HDF5 library
-
-      ref_count = ref_count - 1
-
-      if (ref_count == 0) then
-         call close_library_()
-      endif
-
-      ! Finish
-
-      return
-
-   end function is_hdf5
+   end subroutine inquire
 
    !****
 
@@ -498,9 +404,9 @@ contains
 
       contains
       
-         function op_len_(loc_id, c_name, c_info, c_data) result(ret_value) bind(C)
+         function op_len_(group_id, c_name, c_info, c_data) result(ret_value) bind(C)
 
-            integer(HID_T), value :: loc_id
+            integer(HID_T), value :: group_id
             character(C_CHAR)     :: c_name(*)
             type(C_PTR), value    :: c_info
             type(C_PTR), value    :: c_data
@@ -514,7 +420,7 @@ contains
 
             call c_f_string(c_name, name)
 
-            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, name, info)
+            @:HDF5_CALL(h5oget_info_by_name_f, group_id, name, info)
 
             if (info%type == ${hdf_type}$) then
 
@@ -534,9 +440,9 @@ contains
 
          !****
 
-         function op_name_(loc_id, c_name, c_info, c_data) result(ret_value) bind(C)
+         function op_name_(group_id, c_name, c_info, c_data) result(ret_value) bind(C)
 
-            integer(HID_T), value :: loc_id
+            integer(HID_T), value :: group_id
             character(C_CHAR)     :: c_name(*)
             type(C_PTR), value    :: c_info
             type(C_PTR), value    :: c_data
@@ -550,7 +456,7 @@ contains
 
             call c_f_string(c_name, name)
 
-            @:HDF5_CALL(h5oget_info_by_name_f, loc_id, name, info)
+            @:HDF5_CALL(h5oget_info_by_name_f, group_id, name, info)
 
             if (info%type == ${hdf_type}$) then
 
@@ -935,5 +841,156 @@ contains
 
       #:endfor
    #:endfor
+
+   !****
+
+   function is_hdf5(file_name)
+
+      character(*), intent(in) :: file_name
+      logical                  :: is_hdf5
+
+      integer :: hdf_err
+
+      ! If necessary, open the HDF5 library
+
+      if (ref_count == 0) then
+         call open_library_()
+      endif
+
+      ref_count = ref_count + 1
+
+      ! Test if the file exists, and is an HDF5 file
+
+      inquire(FILE=file_name, EXIST=is_hdf5)
+
+      if (is_hdf5) then
+         @:HDF5_CALL(h5fis_hdf5_f, file_name, is_hdf5)
+      endif
+
+      ! If necessary, close the HDF5 library
+
+      ref_count = ref_count - 1
+
+      if (ref_count == 0) then
+         call close_library_()
+      endif
+
+      ! Finish
+
+      return
+
+   end function is_hdf5
+
+   !****
+
+   subroutine open_library_()
+
+      integer       :: hdf_err
+
+      ! Open the HDF5 library
+
+      @:HDF5_CALL(h5open_f)
+
+      @:ASSERT(hdf_err == 0, 'failed to open HDF5 library')
+
+      ! Set up data types
+
+      mem_type_id_is = h5kind_to_type(is, H5_INTEGER_KIND)
+      mem_type_id_id = h5kind_to_type(id, H5_INTEGER_KIND)
+
+      mem_type_id_rs = h5kind_to_type(rs, H5_REAL_KIND)
+      mem_type_id_rd = h5kind_to_type(rd, H5_REAL_KIND)
+
+      call create_complex_type_(mem_type_id_rs, mem_type_id_cs)
+      call create_complex_type_(mem_type_id_rd, mem_type_id_cd)
+
+      file_type_id_is = H5T_STD_I32LE
+      file_type_id_id = H5T_STD_I64LE
+
+      file_type_id_rs = H5T_IEEE_F32LE
+      file_type_id_rd = H5T_IEEE_F64LE
+
+      call create_complex_type_(file_type_id_rs, file_type_id_cs)
+      call create_complex_type_(file_type_id_rd, file_type_id_cd)
+
+      ! Finish
+
+      return
+
+   contains
+
+      subroutine create_complex_type_(comp_type_id, type_id)
+
+         integer(HID_T), intent(in)  :: comp_type_id
+         integer(HID_T), intent(out) :: type_id
+
+         integer         :: hdf_err
+         integer(SIZE_T) :: comp_size
+
+         ! Create a complex data type
+
+         @:HDF5_CALL(h5tget_size_f, comp_type_id, comp_size)
+
+         @:HDF5_CALL(h5tcreate_f, H5T_COMPOUND_F, INT(2*comp_size, SIZE_T), type_id)
+         @:HDF5_CALL(h5tinsert_f, type_id, 're', INT(0, SIZE_T), comp_type_id)
+         @:HDF5_CALL(h5tinsert_f, type_id, 'im', INT(comp_size, SIZE_T), comp_type_id)
+
+         ! Finish
+
+         return
+
+      end subroutine create_complex_type_
+
+   end subroutine open_library_
+
+   !****
+
+   subroutine close_library_()
+
+      integer :: hdf_err
+
+      ! Close complex data types
+
+      #:for suffix in COMPLEX_SUFFIXES
+         @:HDF5_CALL(h5tclose_f, mem_type_id_${suffix}$)
+         @:HDF5_CALL(h5tclose_f, file_type_id_${suffix}$)
+      #:endfor
+
+      ! Close the HDF5 library
+
+      @:HDF5_CALL(h5close_f)
+
+      ! Finish
+
+      return
+
+   end subroutine close_library_
+
+   !****
+
+   function obj_name_(obj_id) result (name)
+
+      integer(HID_T), intent(in) :: obj_id
+      character(:), allocatable  :: name
+
+      integer(SIZE_T) :: name_size
+      integer(SIZE_T) :: name_size_chk
+      integer         :: hdf_err
+
+      ! Get the object name
+
+      @:HDF5_CALL(h5iget_name_f, obj_id, name, 0_SIZE_T, name_size)
+
+      allocate(character(name_size)::name)
+
+      @:HDF5_CALL(h5iget_name_f, obj_id, name, name_size, name_size_chk)
+
+      @:ASSERT(name_size == name_size_chk,'returned name has wrong size')
+
+      ! Finish
+
+      return
+
+   end function obj_name_
 
 end module hdf5io_m
