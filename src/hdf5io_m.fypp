@@ -973,13 +973,14 @@ contains
       integer(HID_T), intent(in) :: obj_id
       character(:), allocatable  :: name
 
+      character(0)    :: dummy
       integer(SIZE_T) :: name_size
       integer(SIZE_T) :: name_size_chk
       integer         :: hdf_err
 
       ! Get the object name
 
-      @:HDF5_CALL(h5iget_name_f, obj_id, name, 0_SIZE_T, name_size)
+      @:HDF5_CALL(h5iget_name_f, obj_id, dummy, 0_SIZE_T, name_size)
 
       allocate(character(name_size)::name)
 
