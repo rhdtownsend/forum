@@ -258,46 +258,82 @@ contains
 
    #:for type, suffix in zip(ORDERED_TYPES, ORDERED_SUFFIXES)
 
-      subroutine locate_${suffix}$_(x, x_loc, i_loc)
+      subroutine locate_${suffix}$_(x, x_loc, i_loc, right)
 
-         ${type}$, intent(in)   :: x(:)
-         ${type}$, intent(in)   :: x_loc
-         integer, intent(inout) :: i_loc
+         ${type}$, intent(in)          :: x(:)
+         ${type}$, intent(in)          :: x_loc
+         integer, intent(inout)        :: i_loc
+         logical, intent(in), optional :: right
 
+         logical :: right_
          integer :: n
-         integer :: i_lo = 1
-         integer :: i_hi = 1
-         integer :: di
-         integer :: i_mid
+
+         if (PRESENT(right)) then
+            right_ = right
+         else
+            right_ = .FALSE.
+         endif
 
          ! Use a binary search to find where x_loc falls in x (assumed to
-         ! be in ascending order); x(i_loc) <= x_loc <= x(i_loc+1), with
-         ! the right equality applying only when i_loc == n
+         ! be in ascending order):
+         !
+         !   x(i_loc) <= x_loc < x(i_loc+1)   if .NOT. right
+         !   x(i_loc-1) < x_loc <= x(i_loc)   if right
 
          n = SIZE(x)
 
-         if (x_loc == x(n)) then
+         if (x_loc < x(1)) then
 
-            i_loc = n - 1
+            i_loc = 0
 
-         elseif (x_loc == x(1)) then
+         elseif (x_loc > x(n)) then
 
-            i_loc = 1
+            i_loc = n + 1
 
          else
 
-            i_lo = i_loc
+            if (right_) then
+               call locate_r_(x, x_loc, i_loc)
+            else
+               call locate_l_(x, x_loc, i_loc)
+            endif
 
-            if (i_lo <= 0 .OR. i_lo >= n) then
+         endif
+
+         ! Finish
+
+         return
+
+      contains
+
+         subroutine locate_l_(x, x_loc, i_loc)
+
+            ${type}$, intent(in)   :: x(:)
+            ${type}$, intent(in)   :: x_loc
+            integer, intent(inout) :: i_loc
+
+            integer :: n
+            integer :: i_lo
+            integer :: i_hi
+            integer :: di
+            integer :: i_mid
+
+            ! Expand until bracketed
+
+            n = SIZE(x)
+
+            if (i_loc < 1 .OR. i_loc > n) then
 
                i_lo = 0
-               i_hi = n
+               i_hi = n + 1
 
             else
 
                di = 1
 
-               if (x_loc >= x(i_lo)) then
+               if (x_loc >= x(i_loc)) then
+
+                  i_lo = i_loc
 
                   search_up_loop : do
 
@@ -317,9 +353,10 @@ contains
 
                else
 
+                  i_hi = i_loc
+
                   search_down_loop : do
 
-                     i_hi = i_lo
                      i_lo = i_hi - di
 
                      if (i_lo < 1) then
@@ -329,11 +366,16 @@ contains
 
                      if (x_loc >= x(i_lo)) exit search_down_loop
 
+                     i_hi = i_lo
+                     di = 2*di
+
                   end do search_down_loop
 
                endif
 
             endif
+
+            ! Refine
 
             refine_loop : do
 
@@ -349,13 +391,112 @@ contains
 
             end do refine_loop
 
+            ! Set up the result
+
             i_loc = i_lo
 
-         endif
+            ! Finish
 
-         ! Finish
+            return
 
-         return
+         end subroutine locate_l_
+
+         !****
+
+         subroutine locate_r_(x, x_loc, i_loc)
+
+            ${type}$, intent(in)   :: x(:)
+            ${type}$, intent(in)   :: x_loc
+            integer, intent(inout) :: i_loc
+
+            integer :: n
+            integer :: i_lo
+            integer :: i_hi
+            integer :: di
+            integer :: i_mid
+
+            ! Expand until bracketed
+
+            n = SIZE(x)
+
+            if (i_loc < 1 .OR. i_loc > n) then
+
+               i_lo = 0
+               i_hi = n + 1
+
+            else
+
+               di = 1
+
+               if (x_loc <= x(i_loc)) then
+
+                  i_hi = i_loc
+
+                  search_down_loop : do
+
+                     i_lo = i_hi - di
+
+                     if (i_lo < 1) then
+                        i_lo = 0
+                        exit search_down_loop
+                     endif
+
+                     if (x_loc > x(i_lo)) exit search_down_loop
+
+                     i_hi = i_lo
+                     di = 2*di
+
+                  end do search_down_loop
+
+               else
+
+                  i_lo = i_loc
+
+                  search_up_loop : do
+
+                     i_hi = i_lo + di
+
+                     if (i_hi > n) then
+                        i_hi = n + 1
+                        exit search_up_loop
+                     endif
+
+                     if (x_loc <= x(i_hi)) exit search_up_loop
+
+                     i_lo = i_hi
+                     di = 2*di
+
+                  end do search_up_loop
+
+               endif
+
+            endif
+
+            ! Refine
+
+            refine_loop : do
+
+               if (i_hi-i_lo <= 1) exit refine_loop
+
+               i_mid = (i_hi + i_lo)/2
+
+               if (x_loc <= x(i_mid)) then
+                  i_hi = i_mid
+               else
+                  i_lo = i_mid
+               endif
+
+            end do refine_loop
+
+            ! Set up the result
+
+            i_loc = i_hi
+
+            ! Finish
+
+            return
+
+         end subroutine locate_r_
 
       end subroutine locate_${suffix}$_
 
@@ -365,19 +506,42 @@ contains
 
    #:for type, suffix in zip(REAL_TYPES, REAL_SUFFIXES)
 
-      subroutine locate_uniform_${suffix}$_(x_0, dx, x_loc, i_loc)
+      subroutine locate_uniform_${suffix}$_(x_0, dx, x_loc, i_loc, right)
 
-         ${type}$, intent(in) :: x_0
-         ${type}$, intent(in) :: dx
-         ${type}$, intent(in) :: x_loc
-         integer, intent(out) :: i_loc
+         ${type}$, intent(in)          :: x_0
+         ${type}$, intent(in)          :: dx
+         ${type}$, intent(in)          :: x_loc
+         integer, intent(out)          :: i_loc
+         logical, intent(in), optional :: right
+         
+         logical :: right_
 
-         ! Determine i_loc so that x_0 + (i_loc-1)*dx <= x_loc < x_0 + i_loc*dx
+         if (PRESENT(right)) then
+            right_ = right
+         else
+            right_ = .FALSE.
+         endif
 
-         i_loc = FLOOR((x_loc - x_0)/dx) + 1
+         ! Determine i_loc so that:
+         !
+         !   x_0 + (i_loc-1)*dx <= x_loc < x_0 + i_loc*dx     if left
+         !   x_0 + (i_loc-2)*dx < x_loc <= x_0 + (i_loc-1)*dx if .NOT. left
+         
+         if (right_) then
 
-         if (x_0 + (i_loc-1)*dx > x_loc) i_loc = i_loc - 1
-         if (x_0 + i_loc*dx <= x_loc) i_loc = i_loc + 1
+            i_loc = CEILING((x_loc - x_0)/dx) + 1
+
+            if (x_0 + (i_loc-2)*dx >= x_loc) i_loc = i_loc - 1
+            if (x_0 + (i_loc-1)*dx < x_loc) i_loc = i_loc + 1
+
+         else
+
+            i_loc = FLOOR((x_loc - x_0)/dx) + 1
+         
+            if (x_0 + (i_loc-1)*dx > x_loc) i_loc = i_loc - 1
+            if (x_0 + i_loc*dx <= x_loc) i_loc = i_loc + 1
+
+         end if
 
          ! Finish
 
