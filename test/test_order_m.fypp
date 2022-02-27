@@ -19,7 +19,6 @@ module test_order_m
 
    public :: test
 
-
 contains
 
    subroutine test ()
@@ -36,15 +35,24 @@ contains
       real(RD)              :: x_loc
       integer               :: i_loc
       integer               :: i_loc_chk
+      logical               :: right
 
       integer :: i
 
       ! Iterate over test instances
 
-      print *,'locate'
+      print *,'locate (left)'
 
-      do i = 1, 5
-         call locate_arrange_(i)
+      do i = 1, 6
+         call locate_arrange_l_(i)
+         call locate_act_(i)
+         call locate_assert_(i)
+      end do
+
+      print *,'locate (right)'
+
+      do i = 1, 6
+         call locate_arrange_r_(i)
          call locate_act_(i)
          call locate_assert_(i)
       end do
@@ -55,13 +63,15 @@ contains
 
    contains
 
-      subroutine locate_arrange_(i)
+      subroutine locate_arrange_l_(i)
 
          integer, intent(in) :: i
 
          integer :: k
 
          x = [(k,k=1,10)]
+
+         right = .FALSE.
 
          select case (i)
          case (1)
@@ -71,23 +81,67 @@ contains
             x_loc = 4.5_RD
             i_loc_chk = 4
          case (3)
-            x_loc = 10._RD
-            i_loc_chk = 9
+            x_loc = 1._RD
+            i_loc_chk = 1
          case (4)
+            x_loc = 10._RD
+            i_loc_chk = 10
+         case (5)
             x_loc = 0.99_RD
             i_loc_chk = 0
-         case (5)
+         case (6)
             x_loc = 10.01_RD
-            i_loc_chk = 10
+            i_loc_chk = 11
          case default
-            @:ABORT(Invalid instance)
+            @:ABORT('invalid instance')
          end select
 
          ! Finish
 
          return
 
-      end subroutine locate_arrange_
+      end subroutine locate_arrange_l_
+
+      !****
+
+      subroutine locate_arrange_r_(i)
+
+         integer, intent(in) :: i
+
+         integer :: k
+
+         right = .TRUE.
+
+         x = [(k,k=1,10)]
+
+         select case (i)
+         case (1)
+            x_loc = 6._RD
+            i_loc_chk = 6
+         case (2)
+            x_loc = 4.5_RD
+            i_loc_chk = 5
+         case (3)
+            x_loc = 1._RD
+            i_loc_chk = 1
+         case (4)
+            x_loc = 10._RD
+            i_loc_chk = 10
+         case (5)
+            x_loc = 0.99_RD
+            i_loc_chk = 0
+         case (6)
+            x_loc = 10.01_RD
+            i_loc_chk = 11
+         case default
+            @:ABORT('invalid instance')
+         end select
+
+         ! Finish
+
+         return
+
+      end subroutine locate_arrange_r_
 
       !****
 
@@ -95,7 +149,7 @@ contains
 
          integer, intent(in) :: i
 
-         call locate(x, x_loc, i_loc)
+         call locate(x, x_loc, i_loc, right=right)
 
          ! Finish
 
