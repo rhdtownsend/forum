@@ -51,7 +51,6 @@ module hdf5io_m
       character(:), allocatable :: group_name
       integer(HID_T)            :: file_id = 0
       integer(HID_T)            :: group_id = 0
-      integer                   :: comp_level = 0
       integer                   :: access_type = 0
       integer, pointer          :: ref_count => null()
    contains
@@ -61,7 +60,7 @@ module hdf5io_m
       #:for obj_type in ('group', 'attr', 'dset')
          procedure, public :: ${obj_type}$_exists
       #:endfor
-      #:for obj_type in ('group', 'dset')
+      #:for obj_type in ('group', 'dset', 'attr')
          procedure, public :: ${obj_type}$_names
       #:endfor
       #:for obj_type in ('attr', 'dset')
@@ -113,12 +112,11 @@ module hdf5io_m
 
 contains
 
-   function hdf5io_t_file_(file_name, access_type, comp_level) result (hi)
+   function hdf5io_t_file_(file_name, access_type) result (hi)
 
-      character(*), intent(in)      :: file_name
-      integer, intent(in)           :: access_type
-      integer, intent(in), optional :: comp_level
-      type(hdf5io_t)                :: hi
+      character(*), intent(in) :: file_name
+      integer, intent(in)      :: access_type
+      type(hdf5io_t)           :: hi
 
       integer        :: hdf_err
       integer(HID_T) :: file_id
@@ -157,12 +155,6 @@ contains
       hi%file_id = file_id
       hi%group_id = group_id
 
-      if (PRESENT(comp_level)) then
-         hi%comp_level = comp_level
-      else
-         hi%comp_level = 0
-      endif
-      
       hi%access_type = access_type
       
       allocate(hi%ref_count)
@@ -205,7 +197,6 @@ contains
 
       hi%file_id = hi_parent%file_id
       hi%group_id = group_id
-      hi%comp_level = hi_parent%comp_level
       hi%access_type = hi_parent%access_type
 
       hi%ref_count => hi_parent%ref_count
@@ -480,6 +471,53 @@ contains
 
    !****
 
+   function attr_names(self) result(names)
+
+      class(hdf5io_t), intent(inout) :: self
+      character(:), allocatable      :: names(:)
+
+      integer          :: n_names
+      integer(SIZE_T)  :: max_len
+      integer(HSIZE_T) :: i_name
+      integer(SIZE_T)  :: len
+      character(1)     :: name
+      integer          :: hdf_err
+
+      ! Get the number of attributes
+
+      @:HDF5_CALL(h5aget_num_attrs_f, self%group_id, n_names)
+
+      ! Loop to get maximum name length
+
+      max_len = 0
+
+      do i_name = 1, n_names
+         len = 0
+         @:HDF5_CALL(h5aget_name_by_idx_f, self%group_id, '.', H5_INDEX_NAME_F, H5_ITER_NATIVE_F, i_name-1, name, size=len)
+         max_len = MAX(len, max_len)
+      end do
+
+      print *,'len:', max_len
+
+      ! Allocate space
+
+      allocate(character(LEN=max_len)::names(n_names))
+
+      ! Iterate again to store the names
+
+      do i_name = 1, n_names
+         @:HDF5_CALL(h5aget_name_by_idx_f, self%group_id, '.', H5_INDEX_NAME_F, H5_ITER_NATIVE_F, i_name-1, names(i_name))
+         print *,'got name:',names(i_name)
+      end do
+
+      ! Finish
+
+      return
+
+   end function attr_names
+
+   !****
+
    #:for obj_type, prefix in (('attr', 'h5a'), ('dset', 'h5d'))
 
       function ${obj_type}$_shape(self, item_name) result(shape)
@@ -702,13 +740,20 @@ contains
 
          #:for type, suffix in zip(NUM_TYPES, NUM_SUFFIXES)
 
+            #:if obj_type == 'dset' and rank > 0
+            subroutine write_${obj_type}$_${suffix}$_${rank}$_(self, item_name, data, comp_level)
+            #:else
             subroutine write_${obj_type}$_${suffix}$_${rank}$_(self, item_name, data)
+            #:endif
             
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
                ${type}$, target, intent(in)   :: data${ARRAY_SPEC(rank)}$
                #:if rank > 0
                contiguous :: data
+               #:endif
+               #:if obj_type == 'dset' and rank > 0
+               integer, intent(in), optional  :: comp_level
                #:endif
 
                integer        :: hdf_err
@@ -729,14 +774,16 @@ contains
                   @:HDF5_CALL(h5screate_f, H5S_SCALAR_F, dspace_id)
                #:endif
 
-               #:if obj_type == 'attr'
-                  @:HDF5_CALL(h5pcreate_f, H5P_ATTRIBUTE_CREATE_F, plist_id)
-               #:else
+               #:if obj_type == 'dset'
                   @:HDF5_CALL(h5pcreate_f, H5P_DATASET_CREATE_F, plist_id)
                   #:if rank > 0
-                     @:HDF5_CALL(h5pset_chunk_f, plist_id, ${rank}$, INT(SHAPE(data), HSIZE_T))
-                     @:HDF5_CALL(h5pset_deflate_f, plist_id, self%comp_level)
+                     if (PRESENT(comp_level)) then
+                        @:HDF5_CALL(h5pset_chunk_f, plist_id, ${rank}$, INT(SHAPE(data), HSIZE_T))
+                        @:HDF5_CALL(h5pset_deflate_f, plist_id, comp_level)
+                     endif
                   #:endif
+               #:else
+                  @:HDF5_CALL(h5pcreate_f, H5P_ATTRIBUTE_CREATE_F, plist_id)
                #:endif
 
                mem_type_id = mem_type_id_${suffix}$
