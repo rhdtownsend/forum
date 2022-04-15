@@ -497,8 +497,6 @@ contains
          max_len = MAX(len, max_len)
       end do
 
-      print *,'len:', max_len
-
       ! Allocate space
 
       allocate(character(LEN=max_len)::names(n_names))
@@ -507,7 +505,6 @@ contains
 
       do i_name = 1, n_names
          @:HDF5_CALL(h5aget_name_by_idx_f, self%group_id, '.', H5_INDEX_NAME_F, H5_ITER_NATIVE_F, i_name-1, names(i_name))
-         print *,'got name:',names(i_name)
       end do
 
       ! Finish
