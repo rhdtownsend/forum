@@ -929,7 +929,18 @@ contains
 
    subroutine open_library_()
 
+      logical, save :: opened = .FALSE.
       integer       :: hdf_err
+
+      ! Workaround: check whether we've been opened before; if so,
+      ! return straght away (this is to play nice with the
+      ! close_library workaround)
+
+      if (opened) then
+         return
+      else
+         opened = .TRUE.
+      end if
 
       ! Open the HDF5 library
 
@@ -993,6 +1004,12 @@ contains
 
       integer :: hdf_err
 
+      ! Workaround: don't actually close the library, because it seems
+      ! the complex data types don't get properly freed, and so end up
+      ! causing a slowdown when we open large numbers of files
+
+      return
+
       ! Close complex data types
 
       #:for suffix in COMPLEX_SUFFIXES
@@ -1000,7 +1017,7 @@ contains
          @:HDF5_CALL(h5tclose_f, file_type_id_${suffix}$)
       #:endfor
 
-      ! Close the HDF5 library
+      ! Close the HDF5 library (this only closes the Fortran interface)
 
       @:HDF5_CALL(h5close_f)
 
