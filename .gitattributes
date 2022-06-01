@@ -1,2 +1,5 @@
 *.inc linguist-language=Fortran
 *.fypp linguist-language=Fortran
+
+.gitattributes export-ignore
+.gitignore export-ignore
