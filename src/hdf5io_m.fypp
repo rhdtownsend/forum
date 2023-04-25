@@ -244,16 +244,21 @@ contains
 
    !****
 
-   subroutine inquire(self, file_name, group_name)
+   subroutine inquire(self, file_name, group_name, file_id, group_id)
 
       class(hdf5io_t), intent(in)                      :: self
       character(:), allocatable, intent(out), optional :: file_name
       character(:), allocatable, intent(out), optional :: group_name
+      integer(HID_T), intent(out), optional            :: file_id
+      integer(HID_T), intent(out), optional            :: group_id
 
       ! Inquire metadata
 
       if (PRESENT(file_name)) file_name = self%file_name
       if (PRESENT(group_name)) group_name = self%group_name
+
+      if (PRESENT(file_id)) file_id = self%file_id
+      if (PRESENT(group_id)) group_id = self%group_id
 
       ! Finish
 
