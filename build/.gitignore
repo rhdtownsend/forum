@@ -1,0 +1,16 @@
+# Compiled object files
+*.o
+
+# Library files
+*.dylib
+*.so
+
+# Fortran module files
+*.mod
+*.smod
+
+# Preprocessed files
+*.f90
+
+# Dependency data
+.depend

@@ -1,12 +1,7 @@
-# Compiled Object files
-*.o
-
-# Fortran module files
-*.mod
-*.smod
-
-# Preprocessed files
-*.f90
+# Created directories
+bin
+include
+lib
 
 # Misc
 *~

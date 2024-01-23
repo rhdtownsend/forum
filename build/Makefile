@@ -1,11 +1,6 @@
 # File     : Makefile
 # Purpose  : makefile for build subdir
 
-# Default settings
-
-# Build test programs
-TESTS ?= yes
-
 # Enable debugging (with a performance penalty)
 DEBUG ?= no
 
@@ -15,29 +10,32 @@ OMP ?= yes
 # Enable FPE checks
 FPE ?= yes
 
-# Targets
+############ DO NOT EDIT BELOW THIS LINE ############
+### (unless you think you know what you're doing) ###
+#####################################################
 
-ifeq (${TESTS},yes)
-  EXEC_TARGETS := ${EXEC_TARGETS} test_order
-endif
+BIN_TARGETS = test_order
+LIB_TARGETS = libforum
 
-# Object lists & related variables
+INC_FILES = forum_m.mod forum.inc memory.inc
+
+# Source file lists & related variables
 #
-# libxxx_OBJS = object files required to compile libxxx
-# lbbxxx_DEPS = dependency that must be added to .libxxx.d file  
-#
-# prog_OBJS = object files required to compile prog
-# prog_LIBS = library files required to link prog
-# prog_DEPS = dependencies that must be added to .prog.d file
+# xxx_SRCS = source files required to compile xxx
+# xxx_USES = source files providing modules USE'd by xxx
+# xxx_LIBS = library files required to link xxx
 
-test_order_OBJS = test_order.o test_order_m.o kinds_m.o order_m.o
-test_order_LIBS = 
-test_order_DEPS = 
+test_order_SRCS = test_order.fypp test_order_m.fypp
+test_order_USES = forum_m.fypp
+test_order_LIBS = libforum
 
-# Search subdirs
+libforum_SRCS = cinter_m.fypp const_m.fypp forum_m.fypp hdf5io_m.fypp \
+   kinds_m.fypp memory_m.fypp order_m.fypp system_m.fypp
 
-SUBDIRS = ../src:../test
+# Directories
 
-# Include other makefiles
+SRC_DIRS = ../src/lib ../src/test ../src/include
+
+# Additional rules
 
 include Make.inc
