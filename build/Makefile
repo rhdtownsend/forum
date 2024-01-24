@@ -14,6 +14,8 @@ FPE ?= yes
 ### (unless you think you know what you're doing) ###
 #####################################################
 
+# Targets
+
 BIN_TARGETS = test_order
 LIB_TARGETS = libforum
 
@@ -30,7 +32,7 @@ test_order_USES = forum_m.fypp
 test_order_LIBS = libforum
 
 libforum_SRCS = cinter_m.fypp const_m.fypp forum_m.fypp hdf5io_m.fypp \
-   kinds_m.fypp memory_m.fypp order_m.fypp system_m.fypp
+   kinds_m.fypp memory_m.fypp order_m.fypp string_m.fypp system_m.fypp
 
 # Directories
 

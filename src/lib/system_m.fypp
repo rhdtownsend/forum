@@ -32,26 +32,28 @@ module system_m
 
    ! Interfaces
 
-   interface get_arg
-      #:for suffix in ALL_SUFFIXES
+   #:for suffix in ALL_SUFFIXES
+
+      interface get_arg
          module procedure get_arg_${suffix}$_
          module procedure get_arg_name_${suffix}$_
-      #:endfor
-   end interface get_arg
+      end interface get_arg
 
-   interface get_env 
-      #:for suffix in ALL_SUFFIXES
+      interface get_env 
          module procedure get_env_${suffix}$_
-      #:endfor
-   end interface get_env
+      end interface get_env
+
+   #:endfor
 
    ! Access specifiers
-
-   private
 
    public :: n_arg
    public :: get_arg
    public :: get_env
+
+   ! Default access
+
+   private
 
 contains
 

@@ -9,17 +9,17 @@ MINIMUM_VERSION = 23.7.2
 
 ifneq ($(MAKECMDGOALS),clean)
 
-  VERSION_CHECK = $(shell ./check_sdk_version $(MINIMUM_VERSION))
+   VERSION_CHECK = $(shell ./check_sdk_version $(MINIMUM_VERSION))
 
-  ifneq ($(VERSION_CHECK),passed)
-    ifeq ($(VERSION_CHECK),SDK too old)
-      $(error Your MESA SDK installation is too old; please update to version $(MINIMUM_VERSION) or newer)
-    else ifeq ($(VERSION_CHECK),SDK not installed)
-      $(error MESA SDK is either not installed or not properly initialized)
-    else
-      $(error Could not determine MESA SDK availability)
-    endif
-  endif
+   ifneq ($(VERSION_CHECK),passed)
+      ifeq ($(VERSION_CHECK),SDK too old)
+         $(error Your MESA SDK installation is too old; please update to version $(MINIMUM_VERSION) or newer)
+      else ifeq ($(VERSION_CHECK),SDK not installed)
+         $(error MESA SDK is either not installed or not properly initialized)
+      else
+         $(error Could not determine MESA SDK availability)
+      endif
+   endif
 
 endif
 
@@ -28,9 +28,9 @@ endif
 ############
 
 ifeq ($(shell uname -s),Darwin)
-  LIB_SUFFIX = .dylib
+   LIB_SUFFIX = .dylib
 else			   
-  LIB_SUFFIX = .so
+   LIB_SUFFIX = .so
 endif
 
 DEPEND_DIR = .depend
@@ -102,9 +102,9 @@ FPPFLAGS := $(FPPFLAGS) \
             $(foreach opt,DEBUG OMP FPE,$(if $(filter yes,$($(opt))),-D$(opt)=1,-D$(opt)=0))
 
 ifeq ($(DEBUG),yes)
-  FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'DEBUG\'
+   FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'DEBUG\'
 else
-  FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'INFO\'
+   FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'INFO\'
 endif
 
 # Rules
@@ -117,7 +117,7 @@ $(ALL_DPPS) :
 # Include generated dependencies from .dpp files
 
 ifneq ($(MAKECMDGOALS),clean)
-  -include $(ALL_DPPS)
+   -include $(ALL_DPPS)
 endif
 
 ############
@@ -137,20 +137,20 @@ ifeq ($(FPE),yes)
 endif
 
 ifeq ($(DEBUG),yes)
-  FFLAGS := $(FFLAGS) -Og -ggdb -fcheck=all -Wall \
-            -Wno-unused-dummy-argument -Wno-maybe-uninitialized -finline-limit=0
+   FFLAGS := $(FFLAGS) -Og -ggdb -fcheck=all -Wall \
+             -Wno-unused-dummy-argument -Wno-maybe-uninitialized -finline-limit=0
 else
-  FFLAGS := $(FFLAGS) -O2
+   FFLAGS := $(FFLAGS) -O2
 endif
 
 ifeq ($(OMP),yes)
-  FFLAGS := $(FFLAGS) -fopenmp
+   FFLAGS := $(FFLAGS) -fopenmp
 endif
 
 ifeq ($(PORTABLE),yes)
-  FFLAGS := $(FFLAGS) -ffp-contract=off
+   FFLAGS := $(FFLAGS) -ffp-contract=off
 else
-  FFLAGS := $(FFLAGS) -march=native
+   FFLAGS := $(FFLAGS) -march=native
 endif
 
 # Rules
@@ -170,7 +170,7 @@ $(ALL_DEPS) : $(DEPEND_DIR)/%.dep : | $(DEPEND_DIR)
 # Include generated dependencies from .dep files
 
 ifneq ($(MAKECMDGOALS),clean)
-  -include $(ALL_DEPS)
+   -include $(ALL_DEPS)
 endif
 
 ##########
@@ -188,11 +188,11 @@ endif
 LDFLAGS = `lapack_link` `hdf5_link` `lapack95_link`
 
 ifeq ($(CRMATH),yes)
-  export MESASDK_MATH_SLOT=crmath
-  LDFLAGS := $(LDFLAGS) `crmath_link` `crlibm_link`
+   export MESASDK_MATH_SLOT=crmath
+   LDFLAGS := $(LDFLAGS) `crmath_link` `crlibm_link`
 else
-  export MESASDK_MATH_SLOT=default
-  LDFLAGS := $(LDFLAGS) `crmath_link`
+   export MESASDK_MATH_SLOT=default
+   LDFLAGS := $(LDFLAGS) `crmath_link`
 endif
 
 # Rules
@@ -216,5 +216,3 @@ $(BIN_FILES) : % : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(LIB_SUFFIX),$$
 $(LIB_FILES) : %$(LIB_SUFFIX) : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(LIB_SUFFIX),$$($$*_LIBS))
 
 $(ALL_DEPS) : $(DEPEND_DIR)/%.dep : $$(subst .fypp,.f90,$$($$*_SRCS) $$($$*_USES))
-
-$(EXTRA_FILES) : $$(notdir $$@)

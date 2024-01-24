@@ -28,6 +28,7 @@ module forum_m
    use kinds_m
    use memory_m
    use order_m
+   use string_m
    use system_m
 
    ! No implicit typing
