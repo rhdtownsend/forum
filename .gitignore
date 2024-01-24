@@ -1,7 +1,7 @@
 # Created directories
-bin
-include
-lib
+bin/
+include/
+lib/
 
 # Misc
 *~

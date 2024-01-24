@@ -17,7 +17,7 @@ FPE ?= yes
 BIN_TARGETS = test_order
 LIB_TARGETS = libforum
 
-INC_FILES = forum_m.mod forum.inc memory.inc
+INC_FILES = forum_m.mod forum.inc
 
 # Source file lists & related variables
 #
