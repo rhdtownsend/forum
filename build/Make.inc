@@ -33,6 +33,10 @@ else
    LIB_SUFFIX = .so
 endif
 
+BIN_DIR ?= ../bin
+LIB_DIR ?= ../lib
+INC_DIR ?= ../include
+
 DEPEND_DIR = .depend
 
 BIN_FILES = $(BIN_TARGETS)
