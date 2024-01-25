@@ -311,7 +311,7 @@ contains
 
    !****
 
-   function extract (string, start, finish) result(substring)
+   function extract(string, start, finish) result(substring)
 
       character(*), intent(in)      :: string
       integer, optional, intent(in) :: start
@@ -345,7 +345,7 @@ contains
 
    !****
 
-   function insert (string, start, substring) result(new_string)
+   function insert(string, start, substring) result(new_string)
 
       character(*), intent(in)  :: string
       integer, intent(in)       :: start
@@ -368,7 +368,7 @@ contains
 
    !****
 
-   function remove (string, start, finish) result(new_string)
+   function remove(string, start, finish) result(new_string)
 
       character(*), intent(in)      :: string
       integer, optional, intent(in) :: start
@@ -525,7 +525,7 @@ contains
 
    !****
 
-   subroutine split (string, word, set, separator, back)
+   subroutine split(string, word, set, separator, back)
 
       character(:), allocatable, intent(inout)         :: string
       character(:), allocatable, intent(out)           :: word

@@ -102,9 +102,9 @@ FPPFLAGS := $(FPPFLAGS) \
             $(foreach opt,DEBUG OMP FPE,$(if $(filter yes,$($(opt))),-D$(opt)=1,-D$(opt)=0))
 
 ifeq ($(DEBUG),yes)
-   FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'DEBUG\'
+   FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'DEBUG\' -DGFORTRAN_PR_112828
 else
-   FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'INFO\'
+   FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'INFO\' -DGFORTRAN_PR_112828
 endif
 
 # Rules

@@ -137,13 +137,17 @@
       i_a = LBOUND(array)
       i_b = i_a + shape - 1
 
-      if (PRESENT(stat)) then
-         allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$, STAT=stat)
-         if (stat /= 0) return
-      else
+      #:if defined('GFORTRAN_PR_69185')
          allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$)
-      endif
-
+      #else
+         if (PRESENT(stat)) then
+            allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$, STAT=stat)
+            if (stat /= 0) return
+         else
+            allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$)
+         endif
+      #:endif
+      
       ! Copy the data from old to new
 
       i_c = MIN(i_b, UBOUND(array))
