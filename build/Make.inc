@@ -49,25 +49,13 @@ ALL_DEPS = $(addprefix $(DEPEND_DIR)/,$(BIN_TARGETS:%=%.dep) $(LIB_TARGETS:%=%.d
 
 all : $(BIN_FILES) $(LIB_FILES)
 
-install : bin-install lib-install inc-install
+install : $(addprefix $(BIN_DIR)/,$(BIN_FILES)) \
+          $(addprefix $(LIB_DIR)/,$(LIB_FILES)) \
+	  $(addprefix $(INC_DIR)/,$(INC_FILES))
 
-bin-install : $(BIN_FILES)
-	@for file in $^; do \
-	    echo CP $${file} ${BIN_DIR}; \
-	    cp $${file} ${BIN_DIR}; \
-	done
-
-lib-install : $(LIB_FILES)
-	@for file in $^; do \
-	    echo CP $${file} ${LIB_DIR}; \
-	    cp $${file} ${LIB_DIR}; \
-	done
-
-inc-install : $(INC_FILES)
-	@for file in $^; do \
-	    echo CP $${file} ${INC_DIR}; \
-	    cp $${file} ${INC_DIR}; \
-	done
+$(BIN_DIR)/% $(LIB_DIR)/% $(INC_DIR)/% : %
+	@echo CP $* $@
+	@cp $< $@
 
 $(DEPEND_DIR) :
 	mkdir -p $@
@@ -78,7 +66,7 @@ clean : almostclean
 almostclean :
 	rm -f $(BIN_FILES) $(LIB_FILES) *.f90 *.mod *.smod *.o 
 
-.PHONY: all clean almostclean
+.PHONY: all install clean almostclean
 
 .SUFFIXES:
 
