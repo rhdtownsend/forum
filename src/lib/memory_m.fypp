@@ -52,7 +52,11 @@ contains
 
    #:for type, suffix in zip(ALL_TYPES, ALL_SUFFIXES)
       #:for rank in range(1, RANK_MAX+1)
-         $:REALLOCATE(type, suffix, rank)
+         #:if type == 'character(*)' and defined('GFORTRAN_PR_112828')
+            $:REALLOCATE_NOSTAT(type, suffix, rank)
+         #:else
+            $:REALLOCATE(type, suffix, rank)
+         #:endif
       #:endfor
    #:endfor
 
