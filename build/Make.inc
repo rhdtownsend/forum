@@ -57,7 +57,15 @@ install : $(addprefix $(BIN_DIR)/,$(BIN_FILES)) \
           $(addprefix $(LIB_DIR)/,$(LIB_FILES)) \
 	  $(addprefix $(INC_DIR)/,$(INC_FILES))
 
-$(BIN_DIR)/% $(LIB_DIR)/% $(INC_DIR)/% : %
+$(BIN_DIR)/% : %
+	@echo CP $* $@
+	@cp $< $@
+
+$(LIB_DIR)/% : %
+	@echo CP $* $@
+	@cp $< $@
+
+$(INC_DIR)/% : %
 	@echo CP $* $@
 	@cp $< $@
 
@@ -68,7 +76,7 @@ clean : almostclean
 	rm -f $(DEPEND_DIR)/*
 
 almostclean :
-	rm -f $(BIN_FILES) $(LIB_FILES) *.f90 *.mod *.smod *.o 
+	rm -f $(BIN_FILES) $(LIB_FILES) $(INC_FILES) *.f90 *.mod *.smod *.o 
 
 .PHONY: all install clean almostclean
 
@@ -155,7 +163,7 @@ $(DEPEND_DIR)/%.anc : %.f90 | $(DEPEND_DIR)
 	@$(FC) $(FFLAGS) -fsyntax-only -c $*.f90
 	@touch $@
 
-$(ALL_DEPS) : $(DEPEND_DIR)/%.dep : | $(DEPEND_DIR)
+$(ALL_DEPS) : | $(DEPEND_DIR)
 	@echo MAKEDEP $*
 	@$(MAKEDEP) $^ > $@
 
