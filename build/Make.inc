@@ -101,7 +101,7 @@ endif
 
 # Rules
 
-%.f90 : %.fypp $(DEPEND_DIR)/%.dpp | $(DEPEND_DIR)
+%.f90 : %.fypp | $(DEPEND_DIR)
 	@$(FPP) $(FPPFLAGS) -d $(DEPEND_DIR)/$*.dpp $< $@
 
 $(ALL_DPPS) : 
@@ -171,7 +171,7 @@ endif
 
 ifeq ($(shell uname -s),Darwin)
   LIB_LDFLAGS = -shared -install_name $(LIB_DIR)/$@
-  BIN_LDFLAGS = -Wl,
+  BIN_LDFLAGS = 
 else			   
   LIB_LDFLAGS = -Wl,--no-warn-execstack -shared -Wl,-rpath -Wl,$(LIB_DIR)
   BIN_LDFLAGS = -Wl,--no-warn-execstack -Wl,-rpath -Wl,$(LIB_DIR)

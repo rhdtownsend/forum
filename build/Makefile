@@ -28,7 +28,7 @@ INC_FILES = forum_m.mod forum.inc
 # xxx_LIBS = library files required to link xxx
 
 test_order_SRCS = test_order.fypp test_order_m.fypp
-test_order_USES = forum_m.fypp
+test_order_USES = $(libforum_SRCS)
 test_order_LIBS = libforum
 
 libforum_SRCS = cinter_m.fypp const_m.fypp forum_m.fypp hdf5io_m.fypp \
