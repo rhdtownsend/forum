@@ -1,6 +1,8 @@
 # File     : Make.inc
 # Purpose  : standard makefile rules, targets
 
+SHELL := /bin/bash
+
 #########
 # Checks
 #########
@@ -28,9 +30,11 @@ endif
 ############
 
 ifeq ($(shell uname -s),Darwin)
-   LIB_SUFFIX = .dylib
-else			   
-   LIB_SUFFIX = .so
+   STATIC_LIB_SUFFIX = .a
+   SHARED_LIB_SUFFIX = .dylib
+else
+   STATIC_LIB_SUFFIX = .a
+   SHARED_LIB_SUFFIX = .so
 endif
 
 BIN_DIR ?= ../bin
@@ -40,7 +44,17 @@ INC_DIR ?= ../include
 DEPEND_DIR = .depend
 
 BIN_FILES = $(BIN_TARGETS)
-LIB_FILES = $(addsuffix $(LIB_SUFFIX),$(LIB_TARGETS))
+
+STATIC_LIB_FILES = $(addsuffix $(STATIC_LIB_SUFFIX),$(LIB_TARGETS))
+SHARED_LIB_FILES = $(addsuffix $(SHARED_LIB_SUFFIX),$(LIB_TARGETS))
+
+ifeq ($(SHARED),yes)
+   LIB_FILES = $(STATIC_LIB_FILES) $(SHARED_LIB_FILES) 
+   LIB_SUFFIX = $(SHARED_LIB_SUFFIX)
+else
+   LIB_FILES = $(STATIC_LIB_FILES)
+   LIB_SUFFIX = $(STATIC_LIB_SUFFIX)
+endif
 
 ALL_SRCS = $(foreach target,$(BIN_TARGETS) $(LIB_TARGETS),$($(target)_SRCS) $($(target)_USES))
 
@@ -76,7 +90,7 @@ clean : almostclean
 	rm -f $(DEPEND_DIR)/*
 
 almostclean :
-	rm -f $(BIN_FILES) $(LIB_FILES) $(INC_FILES) *.f90 *.mod *.smod *.o 
+	rm -f $(BIN_FILES) $(STATIC_LIB_FILES) $(SHARED_LIB_FILES) $(INC_FILES) *.f90 *.mod *.smod *.o 
 
 .PHONY: all install clean almostclean
 
@@ -177,12 +191,16 @@ endif
 # Linking
 ##########
 
+AR = ar
+
 ifeq ($(shell uname -s),Darwin)
-  LIB_LDFLAGS = -shared -install_name $(LIB_DIR)/$@
-  BIN_LDFLAGS = 
+   LIB_LDFLAGS = -shared -install_name $(LIB_DIR)/$@
+   BIN_LDFLAGS = 
+   ARFLAGS = -cr
 else			   
-  LIB_LDFLAGS = -Wl,--no-warn-execstack -shared -Wl,-rpath -Wl,$(LIB_DIR)
-  BIN_LDFLAGS = -Wl,--no-warn-execstack -Wl,-rpath -Wl,$(LIB_DIR)
+   LIB_LDFLAGS = -Wl,--no-warn-execstack -shared -Wl,-rpath -Wl,$(LIB_DIR)
+   BIN_LDFLAGS = -Wl,--no-warn-execstack -Wl,-rpath -Wl,$(LIB_DIR)
+   ARFLAGS = cr
 endif
 
 LDFLAGS = `lapack_link` `hdf5_link` `lapack95_link`
@@ -201,7 +219,11 @@ $(BIN_FILES) :
 	@echo LD $@
 	@$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS) $(BIN_LDFLAGS)
 
-$(LIB_FILES) :
+$(STATIC_LIB_FILES) :
+	@echo AR $@
+	@$(AR) $(ARFLAGS) $@ $^
+
+$(SHARED_LIB_FILES) :
 	@echo LD-LIB $@
 	@$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS) $(LIB_LDFLAGS)
 
@@ -213,6 +235,8 @@ $(LIB_FILES) :
 
 $(BIN_FILES) : % : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(LIB_SUFFIX),$$($$*_LIBS))
 
-$(LIB_FILES) : %$(LIB_SUFFIX) : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(LIB_SUFFIX),$$($$*_LIBS))
+$(STATIC_LIB_FILES) : %$(STATIC_LIB_SUFFIX) : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(STATIC_LIB_SUFFIX),$$($$*_LIBS))
+
+$(SHARED_LIB_FILES) : %$(SHARED_LIB_SUFFIX) : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(SHARED_LIB_SUFFIX),$$($$*_LIBS))
 
 $(ALL_DEPS) : $(DEPEND_DIR)/%.dep : $$(subst .fypp,.f90,$$($$*_SRCS) $$($$*_USES))
