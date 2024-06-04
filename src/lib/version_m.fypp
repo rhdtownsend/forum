@@ -1,7 +1,7 @@
-! Module  : kinds_m
-! Purpose : kind type parameter definitions
+! Module  : version_m
+! Purpose : versioning info
 !
-! Copyright 2021-2024 Rich Townsend
+! Copyright 2024 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or
@@ -16,31 +16,22 @@
 ! You should have received a copy of the GNU General Public License
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module kinds_m
-
-   ! Uses
-
-   use ISO_FORTRAN_ENV
+module version_m
 
    ! No implicit typing
-   
+
    implicit none
 
    ! Parameter definitions
 
-   integer, parameter :: IS = INT32
-   integer, parameter :: ID = INT64
-
-   integer, parameter :: RS = REAL32
-   integer, parameter :: RD = REAL64
+   character(*), parameter :: VERSION = 'dev'
 
    ! Access specifiers
 
+   public :: version
+
+   ! Default access
+
    private
 
-   public :: IS
-   public :: ID
-   public :: RS
-   public :: RD
-
-end module kinds_m
+end module version_m

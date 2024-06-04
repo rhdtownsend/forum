@@ -1,7 +1,7 @@
 ! Module  : forum_m
 ! Purpose : library package for ForUM modules
 !
-! Copyright 2021 Rich Townsend
+! Copyright 2021-2024 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or
@@ -30,6 +30,7 @@ module forum_m
    use order_m
    use string_m
    use system_m
+   use version_m
 
    ! No implicit typing
 

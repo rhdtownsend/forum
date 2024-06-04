@@ -1,7 +1,7 @@
 ! Module   : cinter_m
 ! Purpose  : C interoperability support
 !
-! Copyright 2021 Rich Townsend
+! Copyright 2021-2024 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or
@@ -20,43 +20,43 @@
 
 module cinter_m
 
-  ! Uses
+   ! Uses
+   
+   use kinds_m
 
-  use kinds_m
+   use ISO_FORTRAN_ENV
+   use ISO_C_BINDING
 
-  use ISO_FORTRAN_ENV
-  use ISO_C_BINDING
-  
-  ! No implicit typing
+   ! No implicit typing
 
-  implicit none
+   implicit none
 
-  ! Interfaces
+   ! Interfaces
 
-  interface c_f_len
-     module procedure c_f_len_arr_
-     module procedure c_f_len_ptr_
-  end interface c_f_len
+   interface c_f_len
+      module procedure c_f_len_arr_
+      module procedure c_f_len_ptr_
+   end interface c_f_len
 
-  interface c_f_string
-     module procedure c_f_string_arr_
-     module procedure c_f_string_ptr_
-  end interface c_f_string
+   interface c_f_string
+      module procedure c_f_string_arr_
+      module procedure c_f_string_ptr_
+   end interface c_f_string
 
-  interface f_c_string
-     module procedure f_c_string_arr_
-     module procedure f_c_string_ptr_
-  end interface f_c_string
+   interface f_c_string
+      module procedure f_c_string_arr_
+      module procedure f_c_string_ptr_
+   end interface f_c_string
 
-  ! Access specifiers
+   ! Access specifiers
 
-  private
+   private
 
-  public :: c_f_len
-  public :: c_f_string
-  public :: f_c_string
+   public :: c_f_len
+   public :: c_f_string
+   public :: f_c_string
 
-  ! Procedures
+   ! Procedures
 
 contains
 
@@ -124,7 +124,7 @@ contains
    end function c_f_len_ptr_
 
    !****
-   
+
    subroutine c_f_string_arr_(c_str, f_str)
 
       character(C_CHAR), intent(in)          :: c_str(*)
@@ -169,7 +169,7 @@ contains
          call c_f_pointer(c_str, p, [HUGE(0)])
 
          n = c_f_len(p)
-         
+
          allocate(character(LEN=n)::f_str)
 
          copy_loop : do i = 1, n
@@ -189,7 +189,7 @@ contains
    end subroutine c_f_string_ptr_
 
    !****
-   
+
    subroutine f_c_string_arr_(f_str, c_str)
 
       character(*), intent(in)       :: f_str
