@@ -41,6 +41,10 @@ libforum_SRCS = cinter_m.fypp const_m.fypp forum_m.fypp hdf5io_m.fypp \
 
 SRC_DIRS = ../src/lib ../src/test ../src/include
 
-# Additional rules
+# Additional link flags
+
+LDFLAGS = `lapack_link` `hdf5_link` `lapack95_link`
+
+# Include standard rules
 
 include Make.inc

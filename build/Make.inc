@@ -194,16 +194,15 @@ endif
 AR = ar
 
 ifeq ($(shell uname -s),Darwin)
-   LIB_LDFLAGS = -shared -install_name $(LIB_DIR)/$@
-   BIN_LDFLAGS = 
+   SHARED_LIB_LDFLAGS = -shared -install_name $(LIB_DIR)/$@
    ARFLAGS = -cr
 else			   
-   LIB_LDFLAGS = -Wl,--no-warn-execstack -shared -Wl,-rpath -Wl,$(LIB_DIR)
-   BIN_LDFLAGS = -Wl,--no-warn-execstack -Wl,-rpath -Wl,$(LIB_DIR)
+   SHARED_LIB_LDFLAGS = -Wl,--no-warn-execstack -shared -Wl,-rpath -Wl,$(LIB_DIR)
+   ifeq ($(SHARED),yes) then
+      BIN_LDFLAGS = -Wl,--no-warn-execstack -Wl,-rpath -Wl,$(LIB_DIR)
+   endif	
    ARFLAGS = cr
 endif
-
-LDFLAGS = `lapack_link` `hdf5_link` `lapack95_link`
 
 ifeq ($(CRMATH),yes)
    export MESASDK_MATH_SLOT=crmath
@@ -220,12 +219,12 @@ $(BIN_FILES) :
 	@$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS) $(BIN_LDFLAGS)
 
 $(STATIC_LIB_FILES) :
-	@echo AR $@
+	@echo AR-LIB $@
 	@$(AR) $(ARFLAGS) $@ $^
 
 $(SHARED_LIB_FILES) :
 	@echo LD-LIB $@
-	@$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS) $(LIB_LDFLAGS)
+	@$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS) $(SHARED_LIB_LDFLAGS)
 
 #######################
 # Secondary Expansions
@@ -235,7 +234,7 @@ $(SHARED_LIB_FILES) :
 
 $(BIN_FILES) : % : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(LIB_SUFFIX),$$($$*_LIBS))
 
-$(STATIC_LIB_FILES) : %$(STATIC_LIB_SUFFIX) : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(STATIC_LIB_SUFFIX),$$($$*_LIBS))
+$(STATIC_LIB_FILES) : %$(STATIC_LIB_SUFFIX) : $$(subst .fypp,.o,$$($$*_SRCS))
 
 $(SHARED_LIB_FILES) : %$(SHARED_LIB_SUFFIX) : $$(subst .fypp,.o,$$($$*_SRCS)) $$(addsuffix $(SHARED_LIB_SUFFIX),$$($$*_LIBS))
 
