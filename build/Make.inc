@@ -7,7 +7,7 @@ SHELL := /bin/bash
 # Checks
 #########
 
-MINIMUM_VERSION = 23.7.2
+MINIMUM_VERSION = 21.4.1
 
 ifneq ($(MAKECMDGOALS),clean)
 
