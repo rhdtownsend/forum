@@ -24,7 +24,7 @@ module version_m
 
    ! Parameter definitions
 
-   character(*), parameter :: VERSION = '1.0.1'
+   character(*), parameter :: VERSION = '1.0.2'
 
    ! Access specifiers
 
