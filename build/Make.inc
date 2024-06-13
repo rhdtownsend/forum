@@ -111,9 +111,13 @@ vpath %.inc $(SRC_DIRS)
 
 FPP = PYTHONPATH=$(MESASDK_ROOT)/lib/python ./fypp_deps
 
+FPPOPTS = DEBUG OMP FPE RE_EXPORT_MOD_SYMS
+
 FPPFLAGS := $(FPPFLAGS) \
+	    --line-numbering \
             $(addprefix -I,$(SRC_DIRS)) \
-            $(foreach opt,DEBUG OMP FPE,$(if $(filter yes,$($(opt))),-D$(opt)=1,-D$(opt)=0))
+            $(addprefix -I,$(INC_DIR)) \
+            $(foreach opt,$(FPPOPTS),$(if $(filter yes,$($(opt))),-D$(opt)=1,-D$(opt)=0))
 
 ifeq ($(DEBUG),yes)
    FPPFLAGS := $(FPPFLAGS) -DLOG_LEVEL=\'DEBUG\' -DGFORTRAN_PR_112828
@@ -143,11 +147,11 @@ endif
 FC = gfortran
 MAKEDEP = awk -f makedepf08.awk
 
-FFLAGS := $(FFLAGS) $(addprefix -I,$(MODPATH)) -std=f2018 \
+FFLAGS := $(FFLAGS) -I$(INC_DIR) -std=f2018 \
           -finit-real=snan -fbacktrace -fmax-errors=25 -fPIC
 
 ifeq ($(FPE),yes)
-  FFLAGS := $(FFLAGS) -ffpe-trap=invalid,overflow,zero
+   FFLAGS := $(FFLAGS) -ffpe-trap=invalid,overflow,zero
 endif
 
 ifeq ($(DEBUG),yes)

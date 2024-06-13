@@ -13,6 +13,10 @@ OMP ?= yes
 # Enable FPE checks
 FPE ?= yes
 
+# Re-export symbols from top-level modules (for compliers, like Intel
+# Fortran, that otherwise would need to access lower-level modules)
+RE_EXPORT_MOD_SYMS ?= no
+
 ############ DO NOT EDIT BELOW THIS LINE ############
 ### (unless you think you know what you're doing) ###
 #####################################################

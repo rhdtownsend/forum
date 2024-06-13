@@ -38,6 +38,92 @@ module forum_m
 
    ! Access specifiers
 
-   public
+   #:if RE_EXPORT_MOD_SYMS
 
+      private
+
+      ! cinter_m
+
+      public :: c_f_len
+      public :: c_f_string
+      public :: f_c_string
+
+      ! cinter_m
+ 
+      public :: PI
+      public :: TWOPI
+      public :: HALFPI
+      public :: DEG_TO_RAD
+      public :: RAD_TO_DEG
+      public :: G_GRAVITY
+      public :: C_LIGHT
+      public :: SIGMA_STEFAN
+      public :: A_RADIATION
+      public :: H_PLANCK
+      public :: K_BOLTZMANN
+      public :: U_ATOMIC
+      public :: ELECTRON_VOLT
+      public :: E_ELECTRON
+      public :: M_ELECTRON
+      public :: M_PROTON
+      public :: SIGMA_THOMSON
+      public :: N_AVOGADRO
+      public :: GM_SUN
+      public :: M_SUN
+      public :: R_SUN
+      public :: L_SUN
+      public :: FILENAME_LEN 
+
+      ! hdf5io_m
+
+      public :: CREATE_FILE
+      public :: OPEN_FILE_RO
+      public :: OPEN_FILE_RW
+      public :: TYPE_LEN
+      public :: hdf5io_t
+      public :: is_hdf5
+
+      ! kinds_m
+
+      public :: IS
+      public :: ID
+      public :: RS
+      public :: RD
+
+      ! memory_m
+
+      public :: reallocate
+
+      ! order_m
+
+      public :: sort_indices
+      public :: unique_indices
+      public :: locate
+
+      ! string_m
+ 
+      public :: get
+      public :: put
+      public :: extract
+      public :: insert
+      public :: remove
+      public :: replace
+      public :: split
+
+      ! system_m
+
+      public :: n_arg
+      public :: get_arg
+      public :: get_env
+
+      ! version_m
+
+      public :: VERSION
+
+   #:else
+
+      public
+
+   #:endif
+      
 end module forum_m
