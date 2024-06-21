@@ -1,26 +1,6 @@
 # File     : Makefile
 # Purpose  : makefile for build subdir
 
-# Enable debugging (with a performance penalty)
-DEBUG ?= no
-
-# Build & link against shared libraries
-SHARED ?= yes
-
-# Enable OpenMP parallelization
-OMP ?= yes
-
-# Enable FPE checks
-FPE ?= yes
-
-# Re-export symbols from top-level modules (for compliers, like Intel
-# Fortran, that otherwise would need to access lower-level modules)
-RE_EXPORT_MOD_SYMS ?= no
-
-############ DO NOT EDIT BELOW THIS LINE ############
-### (unless you think you know what you're doing) ###
-#####################################################
-
 # Targets
 
 BIN_TARGETS = test_order
@@ -42,11 +22,7 @@ libforum_SRCS = cinter_m.fypp const_m.fypp forum_m.fypp hdf5io_m.fypp \
    kinds_m.fypp memory_m.fypp order_m.fypp string_m.fypp system_m.fypp \
    version_m.fypp
 
-# Directories
-
-SRC_DIRS = ../src/lib ../src/test ../src/include
-
-# Additional link flags
+# Additional flags
 
 LDFLAGS = `lapack_link` `hdf5_link` `lapack95_link`
 
