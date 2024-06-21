@@ -42,7 +42,7 @@ SRC_DIRS = $(addprefix $(SRC_DIR)/,lib test include)
 all :
 	@$(MAKE) -C build
 
-install : | $(BIN_DIR) $(LIB_DIR) $(INC_DIR)
+install : all | $(BIN_DIR) $(LIB_DIR) $(INC_DIR)
 	@$(MAKE) -C build install
 
 clean :
