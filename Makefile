@@ -30,12 +30,12 @@ MAKEFLAGS += --no-print-directory
 
 # Paths
 
-BIN_DIR = $(CURDIR)/bin
-LIB_DIR = $(CURDIR)/lib
-INC_DIR = $(CURDIR)/include
 SRC_DIR = $(CURDIR)/src
-
 SRC_DIRS = $(addprefix $(SRC_DIR)/,lib test include)
+
+BIN_DIR ?= $(CURDIR)/bin
+LIB_DIR ?= $(CURDIR)/lib
+INC_DIR ?= $(CURDIR)/include
 
 # Rules
 
