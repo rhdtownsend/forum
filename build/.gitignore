@@ -1,16 +1,10 @@
-# Compiled object files
-*.o
+# Ignore everything...
+*
 
-# Library files
-*.dylib
-*.so
-
-# Fortran module files
-*.mod
-*.smod
-
-# Preprocessed files
-*.f90
-
-# Dependency data
-.depend
+# ...apart from the build-system files
+!Makefile
+!Make.inc
+!check_sdk_version
+!fypp_deps
+!makedepf08.awk
+!.gitignore
