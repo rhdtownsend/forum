@@ -60,10 +60,12 @@ ALL_DEPS = $(addprefix $(DEPEND_DIR)/,$(BIN_TARGETS:%=%.dep) $(LIB_TARGETS:%=%.d
 ##########
 
 all : $(BIN_FILES) $(LIB_FILES)
+	@:
 
 install : $(addprefix $(BIN_DIR)/,$(BIN_FILES)) \
 	  $(addprefix $(LIB_DIR)/,$(LIB_FILES)) \
           $(addprefix $(INC_DIR)/,$(INC_FILES))
+	@:
 
 clean :
 	@rm -rf $(BIN_FILES) $(STATIC_LIB_FILES) $(SHARED_LIB_FILES) \
