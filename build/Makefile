@@ -3,10 +3,13 @@
 
 # Targets
 
-BIN_TARGETS = test_order
 LIB_TARGETS = libforum
 
 INC_FILES = forum_m.mod forum.inc
+
+ifeq ($(TESTS),yes)
+  BIN_TARGETS += test_order
+endif
 
 # Source file lists & related variables
 #

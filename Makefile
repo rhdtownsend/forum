@@ -1,6 +1,9 @@
 # File     : Makefile
 # Purpose  : top-level makefile
 
+# Build test programs
+TESTS ?= yes
+
 # Enable debugging (with a performance penalty)
 DEBUG ?= no
 
