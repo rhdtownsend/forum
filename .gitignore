@@ -1,7 +1,10 @@
-# Created directories
-bin/
-include/
-lib/
+# .gitignore file for ForUM
 
-# Misc
 *~
+*.o
+*.mod
+
+bin
+lib
+include
+
