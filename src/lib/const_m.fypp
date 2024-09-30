@@ -55,10 +55,12 @@ module const_m
 
    ! Astronomical constants (cgs)
 
-   real(RD), parameter :: GM_SUN = 1.3271244E26_RD ! Gravitational constant * nominal solar mass (IAU 215 resolution B3)
-   real(RD), parameter :: M_SUN = GM_SUN/G_GRAVITY ! Nominal Solar mass
-   real(RD), parameter :: R_SUN = 6.957E10_RD      ! Nominal solar radius (IAU 2015 resolution B3)
-   real(RD), parameter :: L_SUN = 3.828E33_RD      ! Nominal solar luminosity (IAU 2015 resolution B3)
+   real(RD), parameter :: GM_SUN = 1.3271244E26_RD  ! Gravitational constant * nominal solar mass (IAU 215 resolution B3)
+   real(RD), parameter :: M_SUN = GM_SUN/G_GRAVITY  ! Nominal Solar mass
+   real(RD), parameter :: R_SUN = 6.957E10_RD       ! Nominal solar radius (IAU 2015 resolution B3)
+   real(RD), parameter :: L_SUN = 3.828E33_RD       ! Nominal solar luminosity (IAU 2015 resolution B3)
+   real(RD), parameter :: AU = 1.495978707E13_RD    ! Astronomical unit (IAU 2012 resolution B2)
+   real(RD), parameter :: PARSEC = AU*648000._RD/PI ! Parsec (IAU 2015 resolution B2)
 
    ! Filename lengths etc
 
@@ -92,6 +94,8 @@ module const_m
    public :: M_SUN
    public :: R_SUN
    public :: L_SUN
+   public :: AU
+   public :: PARSEC
 
    public :: FILENAME_LEN
 
