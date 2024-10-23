@@ -63,13 +63,13 @@ all : $(BIN_FILES) $(LIB_FILES)
 	@:
 
 install : $(addprefix $(BIN_DIR)/,$(BIN_FILES)) \
-	  $(addprefix $(LIB_DIR)/,$(LIB_FILES)) \
+          $(addprefix $(LIB_DIR)/,$(LIB_FILES)) \
           $(addprefix $(INC_DIR)/,$(INC_FILES))
 	@:
 
 clean :
-	@rm -rf $(BIN_FILES) $(STATIC_LIB_FILES) $(SHARED_LIB_FILES) \
-	        $(INC_FILES) $(DEPEND_DIR) *.f90 *.mod *.smod *.o
+	@rm -rf $(BIN_FILES) $(LIB_FILES) \
+                $(INC_FILES) $(DEPEND_DIR) *.f90 *.mod *.smod *.o
 
 $(BIN_DIR)/% : %
 	@echo CP $* $@
@@ -101,7 +101,7 @@ vpath %.inc $(SRC_DIRS)
 # Preproccessing
 #################
 
-# Flags & files
+# Flags
 
 FPP = PYTHONPATH=$(MESASDK_ROOT)/lib/python ./fypp_deps
 
@@ -112,7 +112,7 @@ FPPFLAGS += --line-numbering $(addprefix -I,$(SRC_DIRS)) \
             -DGFORTRAN_PR_112828
 
 ifeq ($(DEBUG),yes)
-   FPPFLAGS += -DLOG_LEVEL=\'DEBUG\' 
+   FPPFLAGS += -DLOG_LEVEL=\'DEBUG\'
 else
    FPPFLAGS += -DLOG_LEVEL=\'INFO\'
 endif
@@ -134,7 +134,7 @@ endif
 # Compiling
 ############
 
-# Flags & files
+# Flags
 
 FC = gfortran
 MAKEDEP = awk -f makedepf08.awk
@@ -187,10 +187,13 @@ endif
 # Linking
 ##########
 
+# Flags
+
 AR = ar
 
 ifeq ($(shell uname -s),Darwin)
    SHARED_LIB_LDFLAGS = -shared -install_name $(LIB_DIR)/$@
+   BIN_LDFLAGS =
    ARFLAGS = -cr
 else			   
    SHARED_LIB_LDFLAGS = -shared -Wl,-rpath -Wl,$(LIB_DIR)
@@ -206,6 +209,10 @@ ifeq ($(CRMATH),yes)
 else
    export MESASDK_MATH_SLOT=default
    LDFLAGS += `crmath_link`
+endif
+
+ifeq ($(shell uname -s),Linux)
+  LDFLAGS += -Wl,--no-warn-execstack
 endif
 
 # Rules
