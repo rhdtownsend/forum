@@ -43,17 +43,17 @@ SRC_DIRS = $(addprefix $(SRC_DIR)/,lib test include)
 
 # Rules
 
-all :
-	@$(MAKE) -C build
+install : build | $(BIN_DIR) $(LIB_DIR) $(INC_DIR)
+	@$(MAKE) -C build $@
 
-install : all | $(BIN_DIR) $(LIB_DIR) $(INC_DIR)
-	@$(MAKE) -C build install
+build :
+	@$(MAKE) -C build $@
 
 clean :
 	@$(MAKE) -C build clean
 	@rm -rf $(BIN_DIR) $(LIB_DIR) $(INC_DIR)
 
-.PHONY: all install clean
+.PHONY: install build clean
 
 $(BIN_DIR) $(LIB_DIR) $(INC_DIR) :
 	@mkdir -p $@
