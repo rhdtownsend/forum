@@ -1,7 +1,7 @@
 ! Module  : version_m
 ! Purpose : versioning info
 !
-! Copyright 2024 Rich Townsend
+! Copyright 2024-2025 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or
@@ -24,7 +24,7 @@ module version_m
 
    ! Parameter definitions
 
-   character(*), parameter :: VERSION = '1.0.2+dev'
+   character(*), parameter :: VERSION = '1.0.4'
 
    ! Access specifiers
 
