@@ -23,6 +23,5 @@ also defined in the src/lib subdirectory:
 To build ForUM, you need to install the [MESA SDK](http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk). Then, run the following commands in the top-level directory:
 
     make
-    make install
 
 This will place libraries in the lib/ subdirectory, and module/include files in the include/ subdirectory.
