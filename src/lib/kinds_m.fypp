@@ -23,7 +23,7 @@ module kinds_m
    use ISO_FORTRAN_ENV
 
    ! No implicit typing
-   
+
    implicit none
 
    ! Parameter definitions
