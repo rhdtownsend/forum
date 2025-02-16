@@ -513,7 +513,7 @@ contains
          ${type}$, intent(in)          :: x_loc
          integer, intent(out)          :: i_loc
          logical, intent(in), optional :: right
-         
+
          logical :: right_
 
          if (PRESENT(right)) then
@@ -526,7 +526,7 @@ contains
          !
          !   x_0 + (i_loc-1)*dx <= x_loc < x_0 + i_loc*dx     if left
          !   x_0 + (i_loc-2)*dx < x_loc <= x_0 + (i_loc-1)*dx if .NOT. left
-         
+
          if (right_) then
 
             i_loc = CEILING((x_loc - x_0)/dx) + 1
@@ -537,7 +537,7 @@ contains
          else
 
             i_loc = FLOOR((x_loc - x_0)/dx) + 1
-         
+
             if (x_0 + (i_loc-1)*dx > x_loc) i_loc = i_loc - 1
             if (x_0 + i_loc*dx <= x_loc) i_loc = i_loc + 1
 

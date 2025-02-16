@@ -1,0 +1,4 @@
+[check]
+ignore = ["E001","F001","M001","M011","T001","T031","T042","T041","S001"]
+line-length = 132
+file-extensions = ["fypp"]

@@ -39,7 +39,7 @@ module system_m
          module procedure get_arg_name_${suffix}$_
       end interface get_arg
 
-      interface get_env 
+      interface get_env
          module procedure get_env_${suffix}$_
       end interface get_env
 
@@ -113,7 +113,7 @@ contains
       end subroutine get_arg_${suffix}$_
 
       !****
-      
+
       subroutine get_arg_name_${suffix}$_(name, value, status, first, last)
 
          character(*), intent(in)       :: name
@@ -181,7 +181,7 @@ contains
                      return
 
                   end if
-                  
+
                endif
 
                deallocate(buffer)
@@ -312,7 +312,7 @@ contains
                      return
 
                   end if
-                  
+
                endif
 
                deallocate(buffer)
@@ -332,7 +332,7 @@ contains
       end subroutine get_arg_name_${suffix}$_
 
    #:endfor
-      
+
    !****
 
    #:for type, suffix in zip(MATH_TYPES,MATH_SUFFIXES)
@@ -420,5 +420,5 @@ contains
       end subroutine get_env_${suffix}$_
 
    #:endfor
-      
+
 end module system_m
