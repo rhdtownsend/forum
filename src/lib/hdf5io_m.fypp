@@ -97,21 +97,21 @@ module hdf5io_m
    end type hdf5io_t
 
    ! Module variables
-  
+
    integer, save :: ref_count = 0
 
    #:for suffix in NUM_SUFFIXES
       integer(HID_T), save :: mem_type_id_${suffix}$
       integer(HID_T), save :: file_type_id_${suffix}$
    #:endfor
-      
+
    ! Interfaces
 
    interface hdf5io_t
       module procedure hdf5io_t_file_
       module procedure hdf5io_t_group_
    end interface hdf5io_t
-   
+
    ! Access specifiers
 
    private
@@ -122,7 +122,7 @@ module hdf5io_m
    public :: TYPE_LEN
    public :: hdf5io_t
    public :: is_hdf5
-   
+
    ! Procedures
 
 contains
@@ -171,7 +171,7 @@ contains
       hi%group_id = group_id
 
       hi%access_type = access_type
-      
+
       allocate(hi%ref_count)
       hi%ref_count = 1
 
@@ -414,14 +414,14 @@ contains
          return
 
       contains
-      
+
          function op_len_(group_id, c_name, c_info, c_data) result(ret_value) bind(C)
 
-            integer(HID_T), value :: group_id
-            character(C_CHAR)     :: c_name(*)
-            type(C_PTR), value    :: c_info
-            type(C_PTR), value    :: c_data
-            integer(C_INT)        :: ret_value
+            integer(HID_T), intent(in), value :: group_id
+            character(C_CHAR), intent(in)     :: c_name(:)
+            type(C_PTR), intent(in), value    :: c_info
+            type(C_PTR), intent(in), value    :: c_data
+            integer(C_INT)                    :: ret_value
 
             character(:), allocatable :: name
             type(H5O_INFO_T), target  :: info
@@ -453,11 +453,11 @@ contains
 
          function op_name_(group_id, c_name, c_info, c_data) result(ret_value) bind(C)
 
-            integer(HID_T), value :: group_id
-            character(C_CHAR)     :: c_name(*)
-            type(C_PTR), value    :: c_info
-            type(C_PTR), value    :: c_data
-            integer(C_INT)        :: ret_value
+            integer(HID_T), intent(in), value :: group_id
+            character(C_CHAR), intent(in)     :: c_name(:)
+            type(C_PTR), intent(in), value    :: c_info
+            type(C_PTR), intent(in), value    :: c_data
+            integer(C_INT)                    :: ret_value
 
             character(:), allocatable :: name
             type(H5O_INFO_T), target  :: info
@@ -486,7 +486,7 @@ contains
          end function op_name_
 
       end function ${obj_type}$_names
-         
+
    #:endfor
 
    !****
@@ -626,7 +626,7 @@ contains
          #:endfor
 
          #:for type, suffix in zip(CHAR_TYPES, CHAR_SUFFIXES)
-            
+
             subroutine read_${obj_type}$_${suffix}$_${rank}$_(self, item_name, data)
 
                class(hdf5io_t), intent(inout) :: self
@@ -653,7 +653,7 @@ contains
                   @:ASSERT(ALL(item_shape == SHAPE(data)), 'shape mismatch')
 
                #:endif
-         
+
                ! Read the character item
 
                @:HDF5_CALL(h5tcopy_f, H5T_NATIVE_CHARACTER, mem_type_id)
@@ -676,7 +676,7 @@ contains
          #:endfor
 
          #:for type, suffix in zip(LOGICAL_TYPES, LOGICAL_SUFFIXES)   
-            
+
             subroutine read_${obj_type}$_${suffix}$_${rank}$_(self, item_name, data)
 
                class(hdf5io_t), intent(inout) :: self
@@ -701,7 +701,7 @@ contains
             end subroutine read_${obj_type}$_${suffix}$_${rank}$_
 
          #:endfor
-            
+
       #:endfor
    #:endfor
 
@@ -710,7 +710,7 @@ contains
    #:for obj_type in ('attr', 'dset')
       #:for rank in range(RANK_MAX+1)
          #:for type, suffix in zip(ALL_TYPES, ALL_SUFFIXES)
-         
+
             subroutine alloc_read_${obj_type}$_${suffix}$_${rank}$_(self, item_name, data)
 
                class(hdf5io_t), intent(inout)     :: self
@@ -722,7 +722,7 @@ contains
                #:endif
 
                ! Allocate the item
-                  
+
                #:if rank > 0
 
                   item_shape = self%${obj_type}$_shape(item_name)
@@ -762,7 +762,7 @@ contains
             #:else
             subroutine write_${obj_type}$_${suffix}$_${rank}$_(self, item_name, data)
             #:endif
-            
+
                class(hdf5io_t), intent(inout) :: self
                character(*), intent(in)       :: item_name
                ${type}$, target, intent(in)   :: data${ARRAY_SPEC(rank)}$

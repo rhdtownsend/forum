@@ -124,7 +124,7 @@
       ${type}$, allocatable, intent(inout) :: array${ARRAY_SPEC(rank)}$
       integer, intent(in)                  :: shape(:)
       integer, intent(out), optional       :: stat
-      
+
       ${type_new}$, allocatable :: array_new${ARRAY_SPEC(rank)}$
       integer, allocatable      :: i_a(:)
       integer, allocatable      :: i_b(:)
@@ -143,7 +143,7 @@
       else
          allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$)
       endif
-      
+
       ! Copy the data from old to new
 
       i_c = MIN(i_b, UBOUND(array))
@@ -178,7 +178,7 @@
 
       ${type}$, allocatable, intent(inout) :: array${ARRAY_SPEC(rank)}$
       integer, intent(in)                  :: shape(:)
-      
+
       ${type_new}$, allocatable :: array_new${ARRAY_SPEC(rank)}$
       integer, allocatable      :: i_a(:)
       integer, allocatable      :: i_b(:)
@@ -192,7 +192,7 @@
       i_b = i_a + shape - 1
 
       allocate(array_new${ARRAY_SPEC(rank, 'i_a({0:d}):i_b({0:d})')}$)
-      
+
       ! Copy the data from old to new
 
       i_c = MIN(i_b, UBOUND(array))

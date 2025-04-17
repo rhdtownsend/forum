@@ -32,3 +32,15 @@ LDFLAGS = `lapack_link` `hdf5_link` `lapack95_link`
 # Include standard rules
 
 include Make.inc
+
+# Target for linting
+
+linter :
+	fortitude check \
+            --ignore M011 \
+            --ignore S001 \
+            --ignore E001 \
+            --ignore T042 \
+            --file-extensions=f90
+
+.PHONY: linter
