@@ -72,7 +72,7 @@
    if (.NOT. (${cond}$)) then
       #:set cond_str = cond.replace("'", "''")
       #:if message
-         @:ABORT('assertion ${cond_str}$ failed with message '//${message}$//'"')
+         @:ABORT('assertion ${cond_str}$ failed with message "'//${message}$//'"')
       #:else
          @:ABORT('assertion ${cond_str}$ failed')
       #:endif
