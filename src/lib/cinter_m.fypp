@@ -62,7 +62,7 @@ contains
 
    function c_f_len_arr_(c_str) result(f_len)
 
-      character(C_CHAR), intent(in) :: c_str(:)
+      character(C_CHAR), intent(in) :: c_str(*)
       integer                       :: f_len
 
       integer :: i
@@ -127,7 +127,7 @@ contains
 
    subroutine c_f_string_arr_(c_str, f_str)
 
-      character(C_CHAR), intent(in)          :: c_str(:)
+      character(C_CHAR), intent(in)          :: c_str(*)
       character(:), allocatable, intent(out) :: f_str
 
       integer :: n
@@ -193,7 +193,7 @@ contains
    subroutine f_c_string_arr_(f_str, c_str)
 
       character(*), intent(in)       :: f_str
-      character(C_CHAR), intent(out) :: c_str(:)
+      character(C_CHAR), intent(out) :: c_str(*)
 
       integer :: i
 
