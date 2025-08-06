@@ -21,9 +21,9 @@ test_order_SRCS = test_order.fypp test_order_m.fypp
 test_order_USES = $(libforum_SRCS)
 test_order_LIBS = libforum
 
-libforum_SRCS = cinter_m.fypp const_m.fypp forum_m.fypp hdf5io_m.fypp \
-   kinds_m.fypp memory_m.fypp order_m.fypp string_m.fypp system_m.fypp \
-   version_m.fypp
+libforum_SRCS = arg_parser_m.fypp cinter_m.fypp const_m.fypp forum_m.fypp \
+   hdf5io_m.fypp kinds_m.fypp memory_m.fypp order_m.fypp string_m.fypp \
+   system_m.fypp version_m.fypp
 
 # Build flags
 

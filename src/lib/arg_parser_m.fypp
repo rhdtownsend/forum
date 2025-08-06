@@ -1,0 +1,479 @@
+! Module  : arg_parser_m
+! Purpose : definition of arg_parser_t, for parsing arguments
+!
+! Copyright 2021-2024 Rich Townsend
+!
+! This file is part of the ForUM (Fortran Utility Modules)
+! package. ForUM is free software: you can redistribute it and/or
+! modify it under the terms of the GNU General Public License as
+! published by the Free Software Foundation, version 3.
+!
+! ForUM is distributed in the hope that it will be useful, but WITHOUT
+! ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+! or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+! License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#:include 'forum.inc'
+
+module arg_parser_m
+
+   ! Uses
+
+   !use forum_m
+
+   use ISO_FORTRAN_ENV
+
+   ! No implicit typing
+
+   implicit none (type, external)
+
+   ! Parameter definitions
+
+   integer, parameter :: LONG_NAME_LEN = 32
+
+   integer, parameter :: OPT_NO_ARG = 0
+   integer, parameter :: OPT_REQUIRED_ARG = 1
+   integer, parameter :: OPT_OPTIONAL_ARG = 2
+
+   ! Derived-type definitions
+
+   type :: arg_parser_t
+      private
+      type(arg_option_t), allocatable :: arg_options(:)
+   contains
+      private
+      procedure, public :: define_option
+      procedure         :: parse_cmdline_
+      procedure         :: parse_args_
+      generic, public   :: parse => parse_cmdline_, parse_args_
+   end type arg_parser_t
+
+   type :: arg_option_t
+      character(LONG_NAME_LEN)  :: long_name
+      character(1)              :: short_name
+      integer                   :: type
+   end type arg_option_t
+
+   ! Interfaces
+
+   interface arg_parser_t
+      module procedure arg_parser_t_
+   end interface arg_parser_t
+
+   ! Access specifiers
+
+   private
+
+   public :: LONG_NAME_LEN
+   public :: OPT_NO_ARG
+   public :: OPT_REQUIRED_ARG
+   public :: OPT_OPTIONAL_ARG
+   public :: arg_parser_t
+
+   ! Procedures
+
+contains
+
+   function arg_parser_t_() result(arg_parser)
+
+      type(arg_parser_t) :: arg_parser
+
+      ! Construct the arg_parser
+
+      allocate(arg_parser%arg_options(0))
+
+      ! Finish
+
+      return
+
+   end function arg_parser_t_
+
+   !****
+
+   subroutine define_option(self, long_name, type, short_name)
+
+      class(arg_parser_t), intent(inout)     :: self
+      character(*), intent(in)           :: long_name
+      integer, intent(in)                :: type
+      character(*), intent(in), optional :: short_name
+
+      character(:), allocatable :: short_name_
+      integer :: i_opt
+
+      if (PRESENT(short_name)) then
+         short_name_ = short_name
+      else
+         short_name_ = ''
+      end if
+
+      ! Define the option specified by short_name and type
+
+      i_opt = FINDLOC(self%arg_options%long_name, long_name, DIM=1)
+
+      if (i_opt > 0) then
+
+         ! Option already exists, replace it
+
+         self%arg_options(i_opt) = arg_option_t(long_name=long_name, short_name=short_name_, type=type)
+
+      else
+
+         ! Option does not exist, add it
+
+         self%arg_options = [self%arg_options, &
+            arg_option_t(long_name=long_name, short_name=short_name_, type=type)]
+
+      end if
+
+      ! Finish
+
+      return
+
+   end subroutine define_option
+
+   !****
+
+   subroutine parse_cmdline_(self, proc_arg, proc_opt)
+
+      class(arg_parser_t), intent(in) :: self
+      interface
+         subroutine proc_arg(value)
+            character(LEN=*), intent(in) :: value
+         end subroutine proc_arg
+         subroutine proc_opt(long_name, value)
+            character(LEN=*), intent(in) :: long_name
+            character(LEN=*), intent(in) :: value
+         end subroutine proc_opt
+      end interface
+
+      integer                   :: n
+      integer                   :: max_len
+      integer                   :: arg_len
+      integer                   :: a
+      character(:), allocatable :: args(:)
+
+      ! Parse arguments from the command-line
+
+      n = COMMAND_ARGUMENT_COUNT()
+
+      max_len = 0
+
+      do a = 1, n
+         call GET_COMMAND_ARGUMENT(a, LENGTH=arg_len)
+         max_len = MAX(max_len, arg_len)
+      end do
+
+      allocate(character(max_len) :: args(n))
+
+      do a = 1, n
+         call GET_COMMAND_ARGUMENT(a, args(a))
+      end do
+
+      ! Parse them
+
+      call parse_args_(self, args, proc_arg, proc_opt)
+
+      ! Finish
+
+      return
+
+   end subroutine parse_cmdline_
+
+   !****
+
+   subroutine parse_args_(self, args, proc_arg, proc_opt)
+
+      class(arg_parser_t), intent(in) :: self
+      character(*), intent(in)        :: args(:)
+      interface
+         subroutine proc_arg(value)
+            character(LEN=*), intent(in) :: value
+         end subroutine proc_arg
+         subroutine proc_opt(long_name, value)
+            character(LEN=*), intent(in) :: long_name
+            character(LEN=*), intent(in) :: value
+         end subroutine proc_opt
+      end interface
+
+      integer :: n
+      integer :: a
+      logical :: parse_options
+
+      ! Parse the arguments
+
+      n = SIZE(args)
+
+      a = 1
+
+      parse_options = .TRUE.
+
+      parse_loop: do
+
+         if (a > n) exit parse_loop
+
+         ! Parse the argument
+
+         if (parse_options) then
+
+            if (args(a) == '--') then
+
+               ! Remaining arguments are positional
+
+               parse_options = .FALSE.
+
+            elseif (args(a) == '-') then
+
+               ! Missing short option
+
+               @:ABORT('missing short option')
+
+            elseif (INDEX(args(a), '--') == 1) then
+
+               ! Long option
+
+               call parse_long_opt_(TRIM(args(a)(3:LEN(args))))
+
+            elseif (INDEX(args(a), '-') == 1) then
+
+               ! Short option
+
+               call parse_short_opt_(TRIM(args(a)(2:LEN(args))))
+
+            else
+
+               ! Positional argument
+
+               call proc_arg(TRIM(args(a)))
+
+            end if
+
+         else
+
+            ! Positional argument
+
+            call proc_arg(TRIM(args(a)))
+
+         end if
+
+         a = a + 1
+
+      end do parse_loop
+
+      ! Finish
+
+      return
+
+   contains
+
+      subroutine parse_long_opt_(opt)
+
+         character(LEN=*), intent(in) :: opt
+
+         integer                   :: i_eq
+         character(LONG_NAME_LEN)  :: long_name
+         character(:), allocatable :: value
+         integer                   :: i_opt
+
+         ! Extract the name and value for the long option
+
+         i_eq = INDEX(opt, '=')
+
+         if (i_eq == 0) then
+
+            ! No equals sign present; (possibly) use the next argument
+            ! as the value
+
+            long_name = opt
+
+            i_opt = FINDLOC(self%arg_options%long_name, long_name, DIM=1)
+
+            if (i_opt > 0) then
+
+               select case(self%arg_options(i_opt)%type)
+
+               case(OPT_NO_ARG)
+
+                  value = ''
+
+               case(OPT_REQUIRED_ARG)
+
+                  a = a + 1
+
+                  if (a <= n) then
+                     if (args(a) /= '--') then
+                        value = args(a)
+                     else
+                        @:ABORT('option --'//TRIM(long_name)//' requires an argument')
+                     end if
+                  else
+                     @:ABORT('option --'//TRIM(long_name)//' requires an argument')
+                  end if
+
+               case(OPT_OPTIONAL_ARG)
+
+                  value = ''
+
+               case default
+
+                  @:ABORT('invalid option type')
+
+               end select
+
+            else
+
+               @:ABORT('unrecognized option --'//TRIM(long_name))
+
+            end if
+
+         elseif (i_eq > 1) then
+
+            ! Equals sign present
+
+            long_name = opt(1:i_eq-1)
+
+            i_opt = FINDLOC(self%arg_options%long_name, long_name, DIM=1)
+
+            if (i_opt > 0) then
+
+               select case(self%arg_options(i_opt)%type)
+
+               case(OPT_NO_ARG)
+
+                  @:ABORT('option --'//TRIM(long_name)//' does not take an argument')
+
+               case(OPT_REQUIRED_ARG)
+
+                  if (i_eq < LEN(opt)) then
+                     value = opt(i_eq+1:LEN(opt))
+                  else
+                     @:ABORT('option --'//TRIM(long_name)//' requires an argument')
+                  end if
+
+               case(OPT_OPTIONAL_ARG)
+
+                  if (i_eq < LEN(opt)) then
+                     value = opt(i_eq+1:LEN(opt))
+                  else
+                     value = ''
+                  end if
+
+               case default
+
+                  @:ABORT('invalid option type')
+
+               end select
+
+            else
+
+               @:ABORT('unrecognized option --'//TRIM(long_name))
+
+            end if
+
+         else
+
+            @:ABORT('option lacks a name')
+
+         end if
+
+         ! Process the option
+
+         call proc_opt(long_name, value)
+
+         ! Finish
+
+         return
+
+      end subroutine parse_long_opt_
+
+      !****
+
+      subroutine parse_short_opt_(opt)
+
+         character(*), intent(in) :: opt
+
+         character(1)              :: short_name
+         character(LONG_NAME_LEN)  :: long_name
+         character(:), allocatable :: value
+         integer                   :: i_opt
+
+         ! Extract the name and value for the short option
+
+         if (LEN(opt) > 0) then
+
+            short_name = opt(1:1)
+
+            i_opt = FINDLOC(self%arg_options%short_name, short_name, DIM=1)
+
+            if (i_opt > 0) then
+
+               select case(self%arg_options(i_opt)%type)
+
+               case(OPT_NO_ARG)
+
+                  if (LEN(opt) == 1) then
+                     value = ''
+                  else
+                     @:ABORT('option -'//short_name//' does not take an argument')
+                  end if
+
+               case(OPT_REQUIRED_ARG)
+
+                  if (LEN(opt) == 1) then
+                     a = a + 1
+                     if (a <= n) then
+                        if (args(a) /= '--') then
+                           value = args(a)
+                        else
+                           @:ABORT('option -'//short_name//' requires an argument')
+                        end if
+                     end if
+                  elseif (LEN(opt) > 1) then
+                     value = opt(2:LEN(opt))
+                  else
+                     @:ABORT('option -'//short_name//' requires an argument')
+                  end if
+
+               case(OPT_OPTIONAL_ARG)
+
+                  if (LEN(opt) > 1) then
+                     value = opt(2:LEN(opt))
+                  else
+                     value = ''
+                  end if
+
+               case default
+
+                  @:ABORT('invalid type')
+
+               end select
+
+               long_name = self%arg_options(i_opt)%long_name
+
+            else
+
+               @:ABORT('unrecognized option -'//short_name)
+
+            end if
+
+         else
+
+            @:ABORT('option does not have a name')
+
+         end if
+
+         ! Process the option
+
+         call proc_opt(long_name, value)
+
+         ! Finish
+
+         return
+
+      end subroutine parse_short_opt_
+
+   end subroutine parse_args_
+
+end module arg_parser_m
