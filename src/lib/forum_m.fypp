@@ -22,6 +22,7 @@ module forum_m
 
    ! Uses
 
+   use arg_parser_m
    use cinter_m
    use const_m
    use hdf5io_m
@@ -34,13 +35,20 @@ module forum_m
 
    ! No implicit typing
 
-   implicit none
+   implicit none (type, external)
 
    ! Access specifiers
 
    #:if RE_EXPORT_MOD_SYMS
 
       private
+
+      ! arg_parser_m
+
+      public :: OPT_NO_ARG
+      public :: OPT_REQUIRED_ARG
+      public :: OPT_OPTIONAL_ARG
+      public :: arg_parser_t
 
       ! cinter_m
 
