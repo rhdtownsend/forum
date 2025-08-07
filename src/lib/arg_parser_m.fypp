@@ -43,9 +43,11 @@ module arg_parser_m
    type :: arg_parser_t
       private
       type(arg_option_t), allocatable :: arg_options(:)
+      character(:), allocatable       :: synopsis
    contains
       private
       procedure, public :: define_option
+      procedure, public :: print_summary
       procedure         :: parse_cmdline_
       procedure         :: parse_args_
       generic, public   :: parse => parse_cmdline_, parse_args_
@@ -55,6 +57,8 @@ module arg_parser_m
       character(LONG_NAME_LEN)  :: long_name
       character(1)              :: short_name
       integer                   :: type
+      character(:), allocatable :: usage
+      character(:), allocatable :: description
    end type arg_option_t
 
    ! Interfaces
@@ -77,13 +81,29 @@ module arg_parser_m
 
 contains
 
-   function arg_parser_t_() result(arg_parser)
+   function arg_parser_t_(synopsis, auto_help) result(arg_parser)
 
-      type(arg_parser_t) :: arg_parser
+      character(*), intent(in)      :: synopsis
+      logical, intent(in), optional :: auto_help
+      type(arg_parser_t)            :: arg_parser
+
+      logical :: auto_help_
+
+      if (PRESENT(auto_help)) then
+         auto_help_ = auto_help
+      else
+         auto_help_ = .FALSE.
+      end if
 
       ! Construct the arg_parser
 
       allocate(arg_parser%arg_options(0))
+
+      arg_parser%synopsis = TRIM(synopsis)
+
+      if (auto_help_) then
+         call arg_parser%define_option('help', OPT_NO_ARG, 'h', '--help', 'print this summary')
+      end if
 
       ! Finish
 
@@ -93,38 +113,51 @@ contains
 
    !****
 
-   subroutine define_option(self, long_name, type, short_name)
+   subroutine define_option(self, long_name, type, short_name, usage, description)
 
-      class(arg_parser_t), intent(inout)     :: self
+      class(arg_parser_t), intent(inout) :: self
       character(*), intent(in)           :: long_name
       integer, intent(in)                :: type
       character(*), intent(in), optional :: short_name
+      character(*), intent(in), optional :: description
+      character(*), intent(in), optional :: usage
 
       character(:), allocatable :: short_name_
-      integer :: i_opt
+      character(:), allocatable :: usage_
+      character(:), allocatable :: description_
+      integer                   :: i_opt
 
       if (PRESENT(short_name)) then
-         short_name_ = short_name
+         short_name_ = TRIM(short_name)
       else
          short_name_ = ''
       end if
 
-      ! Define the option specified by short_name and type
+      if (PRESENT(usage)) then
+         usage_ = TRIM(usage)
+      else
+         usage_ = '--'//TRIM(long_name)
+      end if
 
-      i_opt = FINDLOC(self%arg_options%long_name, long_name, DIM=1)
+      if (PRESENT(description)) then
+         description_ = TRIM(description)
+      else
+         description_ = ''
+      end if
+
+      ! Define the option specified by long_name and type
+
+      i_opt = FINDLOC(self%arg_options%long_name, TRIM(long_name), DIM=1)
 
       if (i_opt > 0) then
 
-         ! Option already exists, replace it
-
-         self%arg_options(i_opt) = arg_option_t(long_name=long_name, short_name=short_name_, type=type)
+         @:ABORT('multiple definition of long option "'//TRIM(long_name)//'"')
 
       else
 
-         ! Option does not exist, add it
-
-         self%arg_options = [self%arg_options, &
-            arg_option_t(long_name=long_name, short_name=short_name_, type=type)]
+         self%arg_options = [self%arg_options, arg_option_t( &
+            long_name=long_name, short_name=short_name_, type=type, &
+            usage=usage_, description=description_)]
 
       end if
 
@@ -133,6 +166,68 @@ contains
       return
 
    end subroutine define_option
+
+   !****
+
+   subroutine print_summary(self)
+
+      class(arg_parser_t), intent(in) :: self
+
+      integer                   :: n_opt
+      integer                   :: width
+      character(:), allocatable :: fmt
+      integer                   :: i
+
+      ! Print the summary
+
+      n_opt = SIZE(self%arg_options)
+
+      if (n_opt > 0) then
+
+         write(OUTPUT_UNIT, 100) 'Synopsis:'
+100      format(A,/)
+
+         write(OUTPUT_UNIT, 110) self%synopsis, '[options]'
+110      format(2X,A,1X,A,/)
+
+         write(OUTPUT_UNIT, 100) 'Options:'
+
+         width = 0
+
+         do i = 1, n_opt
+            associate (arg_option => self%arg_options(i))
+               width = MAX(width, LEN_TRIM(arg_option%usage)+3)
+            end associate
+         end do
+
+         allocate(character(15+CEILING(LOG10(REAL(width))))::fmt)
+
+         write(fmt, 120) width+6
+120      format('(2X,A,T7,A,T',I0,',A)')
+
+         do i = 1, n_opt
+            associate (arg_option => self%arg_options(i))
+               if (arg_option%short_name /= '') then
+                  write(OUTPUT_UNIT, fmt) '-'//arg_option%short_name//',', arg_option%usage, arg_option%description
+               else
+                  write(OUTPUT_UNIT, fmt) '', arg_option%usage, arg_option%description
+               end if
+            end associate
+         end do
+
+      else
+
+         write(OUTPUT_UNIT, 100) 'Synopsis:'
+
+         write(OUTPUT_UNIT, 110) self%synopsis
+
+      endif
+
+      ! Finish
+
+      return
+
+   end subroutine print_summary
 
    !****
 
