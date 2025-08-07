@@ -140,7 +140,8 @@ contains
 
       class(arg_parser_t), intent(in) :: self
       interface
-         subroutine proc_arg(value)
+         subroutine proc_arg(a, value)
+            integer, intent(in)          :: a
             character(LEN=*), intent(in) :: value
          end subroutine proc_arg
          subroutine proc_opt(long_name, value)
@@ -152,7 +153,7 @@ contains
       integer                   :: n
       integer                   :: max_len
       integer                   :: arg_len
-      integer                   :: a
+      integer                   :: i
       character(:), allocatable :: args(:)
 
       ! Parse arguments from the command-line
@@ -161,15 +162,15 @@ contains
 
       max_len = 0
 
-      do a = 1, n
-         call GET_COMMAND_ARGUMENT(a, LENGTH=arg_len)
+      do i = 1, n
+         call GET_COMMAND_ARGUMENT(i, LENGTH=arg_len)
          max_len = MAX(max_len, arg_len)
       end do
 
       allocate(character(max_len) :: args(n))
 
-      do a = 1, n
-         call GET_COMMAND_ARGUMENT(a, args(a))
+      do i = 1, n
+         call GET_COMMAND_ARGUMENT(i, args(i))
       end do
 
       ! Parse them
@@ -189,7 +190,8 @@ contains
       class(arg_parser_t), intent(in) :: self
       character(*), intent(in)        :: args(:)
       interface
-         subroutine proc_arg(value)
+         subroutine proc_arg(a, value)
+            integer, intent(in)          :: a
             character(LEN=*), intent(in) :: value
          end subroutine proc_arg
          subroutine proc_opt(long_name, value)
@@ -199,6 +201,7 @@ contains
       end interface
 
       integer :: n
+      integer :: i
       integer :: a
       logical :: parse_options
 
@@ -206,47 +209,50 @@ contains
 
       n = SIZE(args)
 
+      i = 1
       a = 1
 
       parse_options = .TRUE.
 
       parse_loop: do
 
-         if (a > n) exit parse_loop
+         if (i > n) exit parse_loop
 
          ! Parse the argument
 
          if (parse_options) then
 
-            if (args(a) == '--') then
+            if (args(i) == '--') then
 
                ! Remaining arguments are positional
 
                parse_options = .FALSE.
 
-            elseif (args(a) == '-') then
+            elseif (args(i) == '-') then
 
                ! Missing short option
 
                @:ABORT('missing short option')
 
-            elseif (INDEX(args(a), '--') == 1) then
+            elseif (INDEX(args(i), '--') == 1) then
 
                ! Long option
 
-               call parse_long_opt_(TRIM(args(a)(3:LEN(args))))
+               call parse_long_opt_(TRIM(args(i)(3:LEN(args))))
 
-            elseif (INDEX(args(a), '-') == 1) then
+            elseif (INDEX(args(i), '-') == 1) then
 
                ! Short option
 
-               call parse_short_opt_(TRIM(args(a)(2:LEN(args))))
+               call parse_short_opt_(TRIM(args(i)(2:LEN(args))))
 
             else
 
                ! Positional argument
 
-               call proc_arg(TRIM(args(a)))
+               call proc_arg(a, TRIM(args(i)))
+
+               a = a + 1
 
             end if
 
@@ -254,11 +260,13 @@ contains
 
             ! Positional argument
 
-            call proc_arg(TRIM(args(a)))
+            call proc_arg(a, TRIM(args(i)))
+
+            a = a + 1
 
          end if
 
-         a = a + 1
+         i = i + 1
 
       end do parse_loop
 
@@ -300,11 +308,11 @@ contains
 
                case(OPT_REQUIRED_ARG)
 
-                  a = a + 1
+                  i = i + 1
 
-                  if (a <= n) then
-                     if (args(a) /= '--') then
-                        value = args(a)
+                  if (i <= n) then
+                     if (args(i) /= '--') then
+                        value = args(i)
                      else
                         @:ABORT('option --'//TRIM(long_name)//' requires an argument')
                      end if
@@ -422,10 +430,10 @@ contains
                case(OPT_REQUIRED_ARG)
 
                   if (LEN(opt) == 1) then
-                     a = a + 1
-                     if (a <= n) then
-                        if (args(a) /= '--') then
-                           value = args(a)
+                     i = i + 1
+                     if (i <= n) then
+                        if (args(i) /= '--') then
+                           value = args(i)
                         else
                            @:ABORT('option -'//short_name//' requires an argument')
                         end if
