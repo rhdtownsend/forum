@@ -196,13 +196,13 @@ contains
 
          do i = 1, n_opt
             associate (arg_option => self%arg_options(i))
-               width = MAX(width, LEN_TRIM(arg_option%usage)+3)
+               width = MAX(width, LEN_TRIM(arg_option%usage))
             end associate
          end do
 
-         allocate(character(15+CEILING(LOG10(REAL(width))))::fmt)
+         allocate(character(15+CEILING(LOG10(REAL(width+9))))::fmt)
 
-         write(fmt, 120) width+6
+         write(fmt, 120) width+9
 120      format('(2X,A,T7,A,T',I0,',A)')
 
          do i = 1, n_opt
