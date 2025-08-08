@@ -53,6 +53,17 @@
 #!!! Macro definitions
 
 #!!
+#! Stop execution
+#!!
+
+#:def STOP(message=None)
+   #:if message
+      write(OUTPUT_UNIT, FMT=*) ${message}$
+   #:endif
+   stop
+#:enddef
+
+#!!
 #! Abort execution
 #!!
 
