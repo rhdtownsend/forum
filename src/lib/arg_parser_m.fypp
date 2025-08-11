@@ -327,7 +327,7 @@ contains
 
                ! Missing short option
 
-               @:ABORT('missing short option')
+               @:STOP('missing short option')
 
             elseif (INDEX(args(i), '--') == 1) then
 
@@ -409,10 +409,10 @@ contains
                      if (args(i) /= '--') then
                         value = args(i)
                      else
-                        @:ABORT('option --'//TRIM(long_name)//' requires an argument')
+                        @:STOP('option "--'//TRIM(long_name)//'" requires an argument')
                      end if
                   else
-                     @:ABORT('option --'//TRIM(long_name)//' requires an argument')
+                     @:STOP('option "--'//TRIM(long_name)//'" requires an argument')
                   end if
 
                case(OPT_OPTIONAL_ARG)
@@ -427,7 +427,7 @@ contains
 
             else
 
-               @:ABORT('unrecognized option --'//TRIM(long_name))
+               @:STOP('unrecognized option "--'//TRIM(opt)//'"')
 
             end if
 
@@ -445,14 +445,14 @@ contains
 
                case(OPT_NO_ARG)
 
-                  @:ABORT('option --'//TRIM(long_name)//' does not take an argument')
+                  @:STOP('option "--'//TRIM(long_name)//'" does not take an argument')
 
                case(OPT_REQUIRED_ARG)
 
                   if (i_eq < LEN(opt)) then
                      value = opt(i_eq+1:LEN(opt))
                   else
-                     @:ABORT('option --'//TRIM(long_name)//' requires an argument')
+                     @:STOP('option "--'//TRIM(long_name)//'" requires an argument')
                   end if
 
                case(OPT_OPTIONAL_ARG)
@@ -471,13 +471,13 @@ contains
 
             else
 
-               @:ABORT('unrecognized option --'//TRIM(long_name))
+               @:STOP('unrecognized option "--'//TRIM(opt)//'"')
 
             end if
 
          else
 
-            @:ABORT('option lacks a name')
+            @:STOP('unrecognized option "--'//TRIM(opt)//'"')
 
          end if
 
@@ -519,7 +519,7 @@ contains
                   if (LEN(opt) == 1) then
                      value = ''
                   else
-                     @:ABORT('option -'//short_name//' does not take an argument')
+                     @:STOP('option "-'//short_name//'" does not take an argument')
                   end if
 
                case(OPT_REQUIRED_ARG)
@@ -530,13 +530,15 @@ contains
                         if (args(i) /= '--') then
                            value = args(i)
                         else
-                           @:ABORT('option -'//short_name//' requires an argument')
+                           @:STOP('option "-'//short_name//'" requires an argument')
                         end if
+                     else
+                        @:STOP('option "-'//short_name//'" requires an argument')
                      end if
                   elseif (LEN(opt) > 1) then
                      value = opt(2:LEN(opt))
                   else
-                     @:ABORT('option -'//short_name//' requires an argument')
+                     @:STOP('option "-'//short_name//'" requires an argument')
                   end if
 
                case(OPT_OPTIONAL_ARG)
@@ -557,13 +559,13 @@ contains
 
             else
 
-               @:ABORT('unrecognized option -'//short_name)
+               @:STOP('unrecognized option "-'//TRIM(opt)//'"')
 
             end if
 
          else
 
-            @:ABORT('option does not have a name')
+            @:STOP('unrecognized option "-'//TRIM(opt)//'"')
 
          end if
 

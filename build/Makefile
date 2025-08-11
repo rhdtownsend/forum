@@ -8,7 +8,7 @@ LIB_TARGETS = libforum
 INC_FILES = forum_m.mod forum.inc
 
 ifeq ($(TESTS),yes)
-  BIN_TARGETS += test_order
+  BIN_TARGETS += test_order test_arg_parser
 endif
 
 # Source file lists & related variables
@@ -20,6 +20,10 @@ endif
 test_order_SRCS = test_order.fypp test_order_m.fypp
 test_order_USES = $(libforum_SRCS)
 test_order_LIBS = libforum
+
+test_arg_parser_SRCS = test_arg_parser.fypp
+test_arg_parser_USES = $(libforum_SRCS)
+test_arg_parser_LIBS = libforum
 
 libforum_SRCS = arg_parser_m.fypp cinter_m.fypp const_m.fypp forum_m.fypp \
    hdf5io_m.fypp kinds_m.fypp memory_m.fypp order_m.fypp string_m.fypp \
