@@ -2,23 +2,23 @@
 # Purpose  : top-level makefile
 
 # Build test programs
-TESTS ?= yes
+export TESTS ?= yes
 
 # Enable debugging (with a performance penalty)
-DEBUG ?= no
+export DEBUG ?= no
 
 # Build & link against shared libraries
-SHARED ?= yes
+export SHARED ?= yes
 
 # Enable OpenMP parallelization
-OMP ?= yes
+export OMP ?= yes
 
 # Enable FPE checks
-FPE ?= yes
+export FPE ?= yes
 
 # Re-export symbols from top-level modules (for compliers, like Intel
 # Fortran, that otherwise would need to access lower-level modules)
-RE_EXPORT_MOD_SYMS ?= no
+export RE_EXPORT_MOD_SYMS ?= no
 
 ############ DO NOT EDIT BELOW THIS LINE ############
 ### (unless you think you know what you're doing) ###
@@ -26,20 +26,17 @@ RE_EXPORT_MOD_SYMS ?= no
 
 # General make settings
 
-export
-
 SH = /bin/bash
 MAKEFLAGS += --no-print-directory
 
 # Paths
 
-BIN_DIR ?= $(CURDIR)/bin
-LIB_DIR ?= $(CURDIR)/lib
-INC_DIR ?= $(CURDIR)/include
+export BIN_DIR ?= $(CURDIR)/bin
+export LIB_DIR ?= $(CURDIR)/lib
+export INC_DIR ?= $(CURDIR)/include
 
 SRC_DIR = $(CURDIR)/src
-
-SRC_DIRS = $(addprefix $(SRC_DIR)/,lib test include)
+export SRC_DIRS = $(addprefix $(SRC_DIR)/,lib test include)
 
 # Rules
 
