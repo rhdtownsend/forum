@@ -236,10 +236,12 @@ contains
       class(arg_parser_t), intent(in) :: self
       interface
          subroutine proc_arg(a, value)
+            implicit none (type, external)
             integer, intent(in)          :: a
             character(LEN=*), intent(in) :: value
          end subroutine proc_arg
          subroutine proc_opt(long_name, value)
+            implicit none (type, external)
             character(LEN=*), intent(in) :: long_name
             character(LEN=*), intent(in) :: value
          end subroutine proc_opt
@@ -286,10 +288,12 @@ contains
       character(*), intent(in)        :: args(:)
       interface
          subroutine proc_arg(a, value)
+            implicit none (type, external)
             integer, intent(in)          :: a
             character(LEN=*), intent(in) :: value
          end subroutine proc_arg
          subroutine proc_opt(long_name, value)
+            implicit none (type, external)
             character(LEN=*), intent(in) :: long_name
             character(LEN=*), intent(in) :: value
          end subroutine proc_opt
