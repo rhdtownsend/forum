@@ -7,6 +7,7 @@ ForUM (Fortran Utility Modules) is a small set of modules, bundled into a librar
 The main ForUM module is defined in the source file src/lib/forum_m.fypp. This pulls in the following subsidiary modules, 
 also defined in the src/lib subdirectory:
 
+* arg_parser_m.fypp -- command-line argument parsing
 * cinter_m.fypp -- C interoperability
 * const_m.fypp -- mathematical and physical constants
 * hdf5io_m.fypp -- high-level HDF5 input/output
