@@ -5,7 +5,7 @@
 # Checks
 #########
 
-MINIMUM_VERSION := 21.4.1
+MINIMUM_VERSION := 26.2.2
 
 ifneq ($(MAKECMDGOALS),clean)
 
@@ -201,14 +201,6 @@ else
       BIN_LDFLAGS = -Wl,-rpath -Wl,$(LIB_DIR)
    endif
    ARFLAGS = cr
-endif
-
-ifeq ($(CRMATH),yes)
-   export MESASDK_MATH_SLOT=crmath
-   LDFLAGS += `crmath_link` `crlibm_link`
-else
-   export MESASDK_MATH_SLOT=default
-   LDFLAGS += `crmath_link`
 endif
 
 ifeq ($(shell uname -s),Linux)

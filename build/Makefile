@@ -36,7 +36,16 @@ libforum_SRCS = arg_parser_m.fypp cinter_m.fypp const_m.fypp forum_m.fypp \
 
 # Build flags
 
-LDFLAGS = `lapack_link` `hdf5_link` `lapack95_link`
+ifeq ($(CRMATH),yes)
+   PKGCONF = pkgconf --with-path $(MESASDK_ROOT)/math-slots/crmath/lib/pkgconfig
+else
+   PKGCONF = pkgconf --with-path $(MESASDK_ROOT)/math-slots/default/lib/pkgconfig
+endif
+
+PKGS = lapack lapack95 hdf5_fortran
+
+FFLAGS = -g `$(PKGCONF) --cflags $(PKGS)`
+LDFLAGS = -g `$(PKGCONF) --libs $(PKGS)`
 
 # Include standard rules
 
