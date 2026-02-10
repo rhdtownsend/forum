@@ -2,27 +2,45 @@
 # Purpose  : top-level makefile
 
 # Build test programs
-export TESTS ?= yes
+TESTS ?= no
 
 # Enable debugging (with a performance penalty)
-export DEBUG ?= no
+DEBUG ?= no
 
 # Build & link against shared libraries
-export SHARED ?= yes
+SHARED ?= yes
 
 # Enable OpenMP parallelization
-export OMP ?= yes
+OMP ?= yes
 
 # Enable FPE checks
-export FPE ?= yes
+FPE ?= yes
+
+# Enable correctly rounded math functions
+CRMATH ?= yes
+
+# Enable portable math (for bit-for-bit reproducibility; setting to
+# yes may incur a small performance hit)
+PORTABLE ?= yes
 
 # Re-export symbols from top-level modules (for compliers, like Intel
 # Fortran, that otherwise would need to access lower-level modules)
-export RE_EXPORT_MOD_SYMS ?= no
+RE_EXPORT_MOD_SYMS ?= no
 
 ############ DO NOT EDIT BELOW THIS LINE ############
 ### (unless you think you know what you're doing) ###
 #####################################################
+
+# Export options
+
+export TESTS
+export DEBUG
+export SHARED
+export OMP
+export FPE
+export CRMATH
+export PORTABLE
+export RE_EXPORT_MOD_SYMS
 
 # General make settings
 
