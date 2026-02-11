@@ -189,10 +189,8 @@ contains
       character(*), intent(in)      :: group_name
       type(hdf5io_t)                :: hi
 
-      integer         :: hdf_err
-      integer(SIZE_T) :: buf_size
-      integer(SIZE_T) :: name_size
-      integer(HID_T)  :: group_id
+      integer        :: hdf_err
+      integer(HID_T) :: group_id
 
       ! Depending on whether the group already exists, open or create it
 
