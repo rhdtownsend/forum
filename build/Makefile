@@ -57,3 +57,7 @@ linter :
 	fortitude check --file-extensions=f90
 
 .PHONY: all linter
+
+# Source-file specific flags
+
+hdf5io_m.f90: FFLAGS += -Wno-c-binding-type
