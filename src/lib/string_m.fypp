@@ -63,6 +63,7 @@ module string_m
 
    public :: get
    public :: put
+   public :: put_line
    public :: extract
    public :: insert
    public :: remove
