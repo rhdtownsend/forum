@@ -47,14 +47,15 @@ MAKEFLAGS += --no-print-directory
 
 export BIN_DIR ?= $(CURDIR)/bin
 export LIB_DIR ?= $(CURDIR)/lib
+export PKG_DIR ?= $(LIB_DIR)/pkgconfig
 export INC_DIR ?= $(CURDIR)/include
 
-SRC_DIR = $(CURDIR)/src
+export SRC_DIR = $(CURDIR)/src
 export SRC_DIRS = $(addprefix $(SRC_DIR)/,lib test include)
 
 # Rules
 
-install : build | $(BIN_DIR) $(LIB_DIR) $(INC_DIR)
+install : build | $(BIN_DIR) $(LIB_DIR) $(PKG_DIR) $(INC_DIR)
 	@$(MAKE) -C build $@
 
 build :
@@ -62,9 +63,9 @@ build :
 
 clean :
 	@$(MAKE) -C build clean
-	@rm -rf $(BIN_DIR) $(LIB_DIR) $(INC_DIR)
+	@rm -rf $(BIN_DIR) $(LIB_DIR) $(PKG_DIR) $(INC_DIR)
 
 .PHONY: install build clean
 
-$(BIN_DIR) $(LIB_DIR) $(INC_DIR) :
+$(BIN_DIR) $(LIB_DIR) $(PKG_DIR) $(INC_DIR) :
 	@mkdir -p $@

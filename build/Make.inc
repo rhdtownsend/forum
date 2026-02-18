@@ -61,6 +61,7 @@ ALL_DEPS := $(addprefix $(DEPEND_DIR)/,$(BIN_TARGETS:%=%.dep) $(LIB_TARGETS:%=%.
 
 install : $(addprefix $(BIN_DIR)/,$(BIN_FILES)) \
           $(addprefix $(LIB_DIR)/,$(LIB_FILES)) \
+	  $(addprefix $(PKG_DIR)/,$(PKG_FILES)) \
           $(addprefix $(INC_DIR)/,$(INC_FILES))
 	@:
 
@@ -68,18 +69,10 @@ build : $(BIN_FILES) $(LIB_FILES)
 	@:
 
 clean :
-	@rm -rf $(BIN_FILES) $(LIB_FILES) \
-                $(INC_FILES) $(DEPEND_DIR) *.f90 *.mod *.smod *.o
+	@rm -rf $(BIN_FILES) $(LIB_FILES) $(PKG_FILES) \
+	        $(INC_FILES) $(DEPEND_DIR) *.f90 *.mod *.smod *.o
 
-$(BIN_DIR)/% : %
-	@echo CP $* $@
-	@cp $< $@
-
-$(LIB_DIR)/% : %
-	@echo CP $* $@
-	@cp $< $@
-
-$(INC_DIR)/% : %
+$(BIN_DIR)/% $(LIB_DIR)/% $(PKG_DIR)/% $(INC_DIR)/%: %
 	@echo CP $* $@
 	@cp $< $@
 
@@ -95,7 +88,8 @@ $(DEPEND_DIR) :
 ########
 
 vpath %.fypp $(SRC_DIRS)
-vpath %.inc $(SRC_DIRS)
+vpath %.inc $(SRC_DIR)/include
+vpath %.pc $(SRC_DIR)/pkgconfig
 
 #################
 # Preproccessing
@@ -189,17 +183,17 @@ endif
 
 # Flags
 
-AR = ar
+AR := ar
 
 ifeq ($(shell uname -s),Darwin)
    SHARED_LIB_LDFLAGS +=  -Wl,-dead_strip_dylibs -shared -install_name $(LIB_DIR)/$@
-   ARFLAGS = -cr
+   ARFLAGS := -cr
 else			   
    SHARED_LIB_LDFLAGS += -Wl,--as-needed -shared -Wl,-rpath -Wl,$(LIB_DIR)
    ifeq ($(SHARED),yes)
       BIN_LDFLAGS += -Wl,-rpath -Wl,$(LIB_DIR)
    endif
-   ARFLAGS = cr
+   ARFLAGS := cr
 endif
 
 ifeq ($(shell uname -s),Linux)
