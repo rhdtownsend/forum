@@ -1,0 +1,20 @@
+program  test_hdf5io
+
+   ! Uses
+
+   use hdf5io_m
+
+   ! No implicit typing
+
+   implicit none (type, external)
+
+   ! Run the tests
+
+   type(hdf5io_t) :: hi
+
+   hi = hdf5io_t('tmp.h5', CREATE_FILE)
+   call hi%write_dset('a', [1., 2., 3.])
+   call hi%write_attr('b', 5)
+   call hi%final()
+
+end program test_hdf5io
