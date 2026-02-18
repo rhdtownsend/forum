@@ -1,0 +1,11 @@
+prefix=${pcfiledir}/..
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: forum
+Description: FORtran Utilities Module
+URL: https://github.com/rhdtownsend/forum
+Version: 1.1
+Requires.private: hdf5_fortran
+Cflags: -I${includedir}
+Libs: -L${libdir} -lforum
