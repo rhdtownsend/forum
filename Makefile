@@ -16,9 +16,6 @@ OMP ?= yes
 # Enable FPE checks
 FPE ?= yes
 
-# Enable correctly rounded math functions
-CRMATH ?= yes
-
 # Enable portable math (for bit-for-bit reproducibility; setting to
 # yes may incur a small performance hit)
 PORTABLE ?= yes
@@ -38,7 +35,6 @@ export DEBUG
 export SHARED
 export OMP
 export FPE
-export CRMATH
 export PORTABLE
 export RE_EXPORT_MOD_SYMS
 
