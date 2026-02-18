@@ -13,7 +13,7 @@ LIB_TARGETS = libforum
 INC_FILES = forum_m.mod forum.inc
 
 ifeq ($(TESTS),yes)
-  BIN_TARGETS += test_order test_arg_parser
+  BIN_TARGETS += test_order test_arg_parser test_hdf5io
 endif
 
 # Source file lists & related variables
@@ -30,22 +30,20 @@ test_arg_parser_SRCS = test_arg_parser.fypp
 test_arg_parser_USES = $(libforum_SRCS)
 test_arg_parser_LIBS = libforum
 
+test_hdf5io_SRCS = test_hdf5io.fypp
+test_hdf5io_USES = $(libforum_SRCS)
+test_hdf5io_LIBS = libforum
+
 libforum_SRCS = arg_parser_m.fypp cinter_m.fypp const_m.fypp forum_m.fypp \
    hdf5io_m.fypp kinds_m.fypp memory_m.fypp order_m.fypp string_m.fypp \
    system_m.fypp version_m.fypp
 
 # Build flags
 
-ifeq ($(CRMATH),yes)
-   PKGCONF = pkgconf --with-path $(MESASDK_ROOT)/math-slots/crmath/lib/pkgconfig
-else
-   PKGCONF = pkgconf --with-path $(MESASDK_ROOT)/math-slots/default/lib/pkgconfig
-endif
+PKGS = hdf5_fortran
 
-PKGS = lapack lapack95 hdf5_fortran
-
-FFLAGS = -g `$(PKGCONF) --cflags $(PKGS)`
-LDFLAGS = -g `$(PKGCONF) --libs $(PKGS)`
+FFLAGS := `pkgconf --cflags $(PKGS)`
+LDFLAGS := `pkgconf --libs $(PKGS)`
 
 # Include standard rules
 
