@@ -88,8 +88,8 @@ $(DEPEND_DIR) :
 ########
 
 vpath %.fypp $(SRC_DIRS)
-vpath %.inc $(SRC_DIR)/include
 vpath %.pc $(SRC_DIR)/pkgconfig
+vpath %.inc $(SRC_DIR)/include
 
 #################
 # Preproccessing

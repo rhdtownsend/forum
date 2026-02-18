@@ -10,8 +10,8 @@ all:
 
 LIB_TARGETS = libforum
 
-INC_FILES = forum_m.mod forum.inc
 PKG_FILES = forum.pc
+INC_FILES = forum_m.mod forum.inc
 
 ifeq ($(TESTS),yes)
   BIN_TARGETS += test_order test_arg_parser test_hdf5io
