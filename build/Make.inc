@@ -192,13 +192,12 @@ endif
 AR = ar
 
 ifeq ($(shell uname -s),Darwin)
-   SHARED_LIB_LDFLAGS = -shared -install_name $(LIB_DIR)/$@
-   BIN_LDFLAGS =
+   SHARED_LIB_LDFLAGS +=  -Wl,-dead_strip_dylibs -shared -install_name $(LIB_DIR)/$@
    ARFLAGS = -cr
 else			   
-   SHARED_LIB_LDFLAGS = -shared -Wl,-rpath -Wl,$(LIB_DIR)
+   SHARED_LIB_LDFLAGS += -Wl,--as-needed -shared -Wl,-rpath -Wl,$(LIB_DIR)
    ifeq ($(SHARED),yes)
-      BIN_LDFLAGS = -Wl,-rpath -Wl,$(LIB_DIR)
+      BIN_LDFLAGS += -Wl,-rpath -Wl,$(LIB_DIR)
    endif
    ARFLAGS = cr
 endif
@@ -211,7 +210,7 @@ endif
 
 $(BIN_FILES) :
 	@echo LD $@
-	@$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS) $(BIN_LDFLAGS)
+	@$(FC) $(LDFLAGS) -o $@ $^ $(BIN_LDFLAGS)
 
 $(STATIC_LIB_FILES) :
 	@echo AR-LIB $@
@@ -219,7 +218,7 @@ $(STATIC_LIB_FILES) :
 
 $(SHARED_LIB_FILES) :
 	@echo LD-LIB $@
-	@$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS) $(SHARED_LIB_LDFLAGS)
+	@$(FC) $(LDFLAGS) -o $@ $^ $(SHARED_LIB_LDFLAGS)
 
 #######################
 # Secondary Expansions
