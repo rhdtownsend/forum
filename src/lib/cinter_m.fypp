@@ -1,7 +1,7 @@
 ! Module   : cinter_m
 ! Purpose  : C interoperability support
 !
-! Copyright 2021-2024 Rich Townsend
+! Copyright 2021-2026 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or

@@ -1,7 +1,7 @@
 ! Module  : string_m
 ! Purpose : string manipulation
 !
-! Copyright 2024 Rich Townsend
+! Copyright 2021-2026 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or

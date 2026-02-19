@@ -1,7 +1,7 @@
 ! Module  : arg_parser_m
 ! Purpose : definition of arg_parser_t, for parsing arguments
 !
-! Copyright 2021-2024 Rich Townsend
+! Copyright 2021-2026 Rich Townsend
 !
 ! This file is part of the ForUM (Fortran Utility Modules)
 ! package. ForUM is free software: you can redistribute it and/or
