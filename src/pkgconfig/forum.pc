@@ -8,4 +8,5 @@ URL: https://github.com/rhdtownsend/forum
 Version: 1.2
 Requires.private: hdf5_fortran
 Cflags: -I${includedir}
-Libs: -L${libdir} -lforum
+Libs: -Wl,-rpath,${libdir} -L${libdir} -lforum
+
