@@ -59,4 +59,4 @@ linter :
 
 # Source-file specific flags
 
-hdf5io_m.f90: FFLAGS += -Wno-c-binding-type
+$(DEPEND_DIR)/hdf5io_m.anc hdf5io_m.o: FFLAGS += -Wno-c-binding-type
