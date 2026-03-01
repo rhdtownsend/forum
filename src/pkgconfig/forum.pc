@@ -9,4 +9,3 @@ Version: 1.2
 Requires.private: hdf5_fortran
 Cflags: -I${includedir}
 Libs: -Wl,-rpath,${libdir} -L${libdir} -lforum
-
