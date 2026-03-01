@@ -27,17 +27,21 @@ To build ForUM, you need to install the [MESA
 SDK](http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk). Then,
 run the following commands in the top-level directory:
 
-    make
+```
+make
+```
 
 This will place libraries in the lib/ subdirectory, and module/include
-files in the include/ subdirectory. A (pkgconf)[https://pkgconf.org/]
+files in the include/ subdirectory. A [pkgconf](https://pkgconf.org/)
 package file is also provided in the lib/pkgconf subdirectory.
 
 # Using ForUM
 
-To compile/link against libforum, use the following approach:
+To compile/link against ForUM, use the following command (or something similar):
 
-   gfortran -o myprogram myprogram.f90 `pkgconf --with-path=FORUM_DIR/lib/pkgconfig --cflags --libs forum`
+```
+gfortran -o myprogram myprogram.f90 `pkgconf --with-path=FORUM_DIR/lib/pkgconfig --cflags --libs forum`
+```
 
 ...where FORUM_DIR is the path to the top-level ForUM directory.
 
