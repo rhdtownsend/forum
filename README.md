@@ -1,10 +1,12 @@
 # Overview
 
-ForUM (Fortran Utility Modules) is a small set of modules, bundled into a library, for various common utility tasks in modern Fortran.
+ForUM (Fortran Utility Modules) is a small set of modules, bundled
+into a library, for various common utility tasks in modern Fortran.
 
 # Contents
 
-The main ForUM module is defined in the source file src/lib/forum_m.fypp. This pulls in the following subsidiary modules, 
+The main ForUM module is defined in the source file
+src/lib/forum_m.fypp. This pulls in the following subsidiary modules,
 also defined in the src/lib subdirectory:
 
 * arg_parser_m.fypp -- command-line argument parsing
@@ -21,8 +23,21 @@ also defined in the src/lib subdirectory:
 
 # Building ForUM
 
-To build ForUM, you need to install the [MESA SDK](http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk). Then, run the following commands in the top-level directory:
+To build ForUM, you need to install the [MESA
+SDK](http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk). Then,
+run the following commands in the top-level directory:
 
     make
 
-This will place libraries in the lib/ subdirectory, and module/include files in the include/ subdirectory.
+This will place libraries in the lib/ subdirectory, and module/include
+files in the include/ subdirectory. A (pkgconf)[https://pkgconf.org/]
+package file is also provided in the lib/pkgconf subdirectory.
+
+# Using ForUM
+
+To compile/link against libforum, use the following approach:
+
+   gfortran -o myprogram myprogram.f90 `pkgconf --with-path=FORUM_DIR/lib/pkgconfig --cflags --libs forum`
+
+...where FORUM_DIR is the path to the top-level ForUM directory.
+
