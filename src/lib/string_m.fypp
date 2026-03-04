@@ -136,7 +136,13 @@ contains
          else
             read(unit=unit, FMT='(A)', ADVANCE='NO', &
                IOSTAT=local_iostat, SIZE=n_chars_read) buffer(:n_chars_read)
-            if (IS_IOSTAT_EOR(iostat) .OR. IS_IOSTAT_END(iostat)) exit read_loop
+            if (IS_IOSTAT_EOR(local_iostat)) then
+               exit read_loop
+            elseif (IS_IOSTAT_END(local_iostat)) then
+               @:ABORT('end-of-file in get_unit')
+            else
+               @:ABORT('error in get_unit')
+            end if
          endif
 
          string = string//buffer(:n_chars_read)
