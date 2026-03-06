@@ -416,7 +416,7 @@ contains
          function op_len_(group_id, c_name, c_info, c_data) result(ret_value) bind(C)
 
             integer(HID_T), intent(in), value :: group_id
-            character(C_CHAR), intent(in)     :: c_name(:)
+            character(C_CHAR), intent(in)     :: c_name(*)
             type(C_PTR), intent(in), value    :: c_info
             type(C_PTR), intent(in), value    :: c_data
             integer(C_INT)                    :: ret_value
@@ -452,7 +452,7 @@ contains
          function op_name_(group_id, c_name, c_info, c_data) result(ret_value) bind(C)
 
             integer(HID_T), intent(in), value :: group_id
-            character(C_CHAR), intent(in)     :: c_name(:)
+            character(C_CHAR), intent(in)     :: c_name(*)
             type(C_PTR), intent(in), value    :: c_info
             type(C_PTR), intent(in), value    :: c_data
             integer(C_INT)                    :: ret_value

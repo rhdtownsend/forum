@@ -12,9 +12,23 @@ program  test_hdf5io
 
    type(hdf5io_t) :: hi
 
+   character(:), allocatable :: names(:)
+
+   ! Create a file
+
    hi = hdf5io_t('tmp.h5', CREATE_FILE)
    call hi%write_dset('a', [1., 2., 3.])
    call hi%write_attr('b', 5)
    call hi%final()
+
+   ! Read the file
+
+   hi = hdf5io_t('tmp.h5', OPEN_FILE_RO)
+
+   names = hi%dset_names()
+   print *, 'dset names:', names
+
+   names = hi%attr_names()
+   print *, 'attr names:', names
 
 end program test_hdf5io
