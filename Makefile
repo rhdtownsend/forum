@@ -2,7 +2,7 @@
 # Purpose  : top-level makefile
 
 # Build test programs
-TESTS ?= no
+TESTS ?= yes
 
 # Enable debugging (with a performance penalty)
 DEBUG ?= no
