@@ -15,6 +15,7 @@ line-length = 132
  "C072"  # assumed-size character intent
 ]
 "hdf5io_m.f90" = [
+ "C071", # assumed-size arrays
  "C072"  # assumed-size character intent
 ]
 "memory_m.f90" = [
